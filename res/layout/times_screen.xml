@@ -1,0 +1,189 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/timesContentFrame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:background="@color/black" >
+
+    <TableLayout
+        android:id="@+id/timesTableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal" >
+
+        <TableRow
+            android:id="@+id/timesTitleRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/timesTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/timesTitleTextView"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/title_text_size" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/timesScrollRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin"
+            android:layout_weight="1"
+            android:background="@color/gray" >
+
+            <ScrollView
+                android:id="@+id/timesScrollView"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/gray" >
+
+                <TableLayout
+                    android:id="@+id/timesScrollTableLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+                </TableLayout>
+            </ScrollView>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/timesAddNewRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/timesSpaceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:gravity="center_horizontal" />
+        </TableRow>
+    </TableLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <SlidingDrawer
+            android:id="@+id/timesSlidingDrawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:content="@+id/timesDrawerLayout"
+            android:handle="@+id/timesDrawerHandle" >
+
+            <Button
+                android:id="@+id/timesDrawerHandle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/black"
+                android:text="@string/timesAddNewTimeButton"
+                android:textColor="@color/gray" >
+            </Button>
+
+            <LinearLayout
+                android:id="@id/timesDrawerLayout"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/black"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal" >
+
+                    <TableRow
+                        android:id="@+id/timesStartTimeRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/activity_vertical_margin" >
+
+                        <Button
+                            android:id="@+id/timesStartTimeButton"
+                            style="?android:attr/buttonBarButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/timesDrawerStartTimeButton"
+                            android:textColor="@color/gray" />
+
+                        <TextView
+                            android:id="@+id/timesStartTimeView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_span="2"
+                            android:layout_weight="1"
+                            android:gravity="right"
+                            android:text="@string/timesDrawerTextView"
+                            android:textColor="@color/gray" />
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/timesDrawerEndTimeRow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/activity_vertical_margin" >
+
+                        <Button
+                            android:id="@+id/timesEndTimeButton"
+                            style="?android:attr/buttonBarButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/timesDrawerEndTimeButton"
+                            android:textColor="@color/gray" />
+
+                        <TextView
+                            android:id="@+id/timesEndTimeTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_span="2"
+                            android:layout_weight="1"
+                            android:gravity="right"
+                            android:text="@string/timesDrawerTextView"
+                            android:textColor="@color/gray" />
+                    </TableRow>
+
+                    <TableRow
+                        android:id="@+id/timesStartDateRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/activity_vertical_margin" >
+
+                        <Button
+                            android:id="@+id/timesStartDateButton"
+                            style="?android:attr/buttonBarButtonStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/timesDrawerStartDateButton"
+                            android:textColor="@color/gray" />
+
+                        <TextView
+                            android:id="@+id/timesStartDateTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_span="2"
+                            android:layout_weight="1"
+                            android:gravity="right"
+                            android:text="@string/timesDrawerTextView"
+                            android:textColor="@color/gray" />
+                    </TableRow>
+                </TableLayout>
+
+                <Button
+                    android:id="@+id/timesDrawerConfirmButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/timesDrawerConfirmButton" />
+            </LinearLayout>
+        </SlidingDrawer>
+    </FrameLayout>
+
+</FrameLayout>

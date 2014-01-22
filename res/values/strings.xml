@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Equuleus</string>
+
+    <string-array name="list_items">
+        <item>Home</item>
+        <item>Times</item>
+        <item>Contacts</item>
+        <item>Meetings</item>
+    </string-array>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="title_activity_home_screen">HomeScreen</string>
+    <string name="action_settings">Settings</string>
+    <string name="contactsTitleTextView">Contacts</string>
+    <string name="contactsAddNewContactButton">Add Contact</string>
+    <string name="meetingTitleTextView">Meetings</string>
+    <string name="meetingAddNewMeetingButton">Add Meeting</string>
+    <string name="timesTitleTextView">UnAvailable Times</string>
+    <string name="timesAddNewTimeButton">Add New</string>
+    <string name="errorTitleTextView">Error SomeWhere =[</string>
+    <string name="dialogCancelButton">Cancel</string>
+    <string name="dialogConfirmButton">Confirm</string>
+    <string name="timesDrawerStartTimeButton">Start Time</string>
+    <string name="timesDrawerStartDateButton">Start Date</string>
+    <string name="timesDrawerEndTimeButton">End Time</string>
+    <string name="timesDrawerEndDateButton">End Date</string>
+    <string name="timesDrawerConfirmButton">Confirm</string>
+    <string name="timesDrawerTextView">"Not Set "</string>
+    <string name="meetingDurationEditTextHint">Duration of Meeting(In Minutes)</string>
+    <string name="meetingTitleEditTextHint">Title of Meeting</string>
+
+</resources>

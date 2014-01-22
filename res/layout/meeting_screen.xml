@@ -1,0 +1,174 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/meetingContentFrame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:background="@color/black" >
+
+    <TableLayout
+        android:id="@+id/meetingTableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal" >
+
+        <TableRow
+            android:id="@+id/meetingTitleRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/meetingTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/meetingTitleTextView"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/title_text_size" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/meetingScrollRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:layout_weight="1"
+            android:background="@color/gray" >
+
+            <ScrollView
+                android:id="@+id/meetingScrollView"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/gray" >
+
+                <TableLayout
+                    android:id="@+id/meetingScrollTableLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+                </TableLayout>
+            </ScrollView>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/meetingAddNewRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/meetingAddSpace"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+    </TableLayout>
+
+    <SlidingDrawer
+        android:id="@+id/meetingSlidingDrawer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:content="@+id/meetingDrawerLayout"
+        android:handle="@+id/meetingDrawerHandle" >
+
+        <Button
+            android:id="@+id/meetingDrawerHandle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:text="@string/meetingAddNewMeetingButton"
+            android:textColor="@color/gray" >
+        </Button>
+
+        <LinearLayout
+            android:id="@id/meetingDrawerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            android:orientation="vertical" >
+
+            <TableLayout
+                android:id="@+id/meetingDrawerTableLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black" >
+
+                <TableRow
+                    android:id="@+id/meetingDrawerTitleRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:gravity="center_horizontal" >
+
+                    <EditText
+                        android:id="@+id/meetingDrawerTitleEditText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center_horizontal"
+                        android:hint="@string/meetingTitleEditTextHint"
+                        android:textColor="@color/gray"
+                        android:textColorLink="@color/gray" >
+                    </EditText>
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/meetingDrawerDurationRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:gravity="center_horizontal" >
+
+                    <EditText
+                        android:id="@+id/meetingDrawerDurationEditText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center_horizontal"
+                        android:hint="@string/meetingDurationEditTextHint"
+                        android:textColor="@color/gray"
+                        android:textColorLink="@color/gray" >
+                    </EditText>
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/meetingDrawerScrollRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="@dimen/activity_vertical_margin"
+                    android:layout_weight="1"
+                    android:background="@color/gray" >
+
+                    <ScrollView
+                        android:id="@+id/meetingDrawerScroll"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <TableLayout
+                            android:id="@+id/meetingDrawerScrollTableLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" >
+                        </TableLayout>
+                    </ScrollView>
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/timesAddNewRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/activity_horizontal_margin"
+                    android:gravity="center_horizontal" >
+
+                    <Button
+                        android:id="@+id/meetingDrawerConfirmButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/timesDrawerConfirmButton"
+                        android:textColor="@color/gray" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+    </SlidingDrawer>
+
+</FrameLayout>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/contactsScrollRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/gray"
+    android:padding="@dimen/activity_horizontal_margin" >
+
+    <TextView
+        android:id="@+id/contactsScrollTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_span="2"
+        android:layout_weight="1" />
+
+    <ImageButton
+        android:id="@+id/contactsDeleteButton"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:src="@drawable/deletebutton" />
+
+</TableRow>
