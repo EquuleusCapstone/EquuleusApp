@@ -9,8 +9,14 @@
 *.class
 
 # generated files
+<<<<<<< HEAD
+bin/
+gen/
+
+=======
 gen/
 bin/
+>>>>>>> refs/remotes/origin/master
 
 # Local configuration file (sdk path, etc)
 local.properties
