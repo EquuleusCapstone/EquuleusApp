@@ -25,6 +25,8 @@ import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+
+//TESTING ON LAPTOP
 public class ContactsScreen extends Fragment {
 	private TableLayout contactsScrollView;
 	private Button addNewContactButton;
