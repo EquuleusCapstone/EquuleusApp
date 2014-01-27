@@ -1,16 +1,27 @@
 package com.equuleus.equuleusApplication;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,10 +46,10 @@ public class TimesScreen extends Fragment {
 	private int timesCounter = 0;
 	private String startTime, endTime, startDate;
 	private SlidingDrawer drawer;
+	private ArrayList<String> timesArray;
 
 	private TableLayout timesTableLayout;
 
-	private HttpURLConnection connection;
 
 	private TextView timesStartTimeText, timesStartDateText, timesEndTimeText,
 			timesTitle;
@@ -77,6 +88,8 @@ public class TimesScreen extends Fragment {
 		month = c.get(Calendar.MONTH);
 		year = c.get(Calendar.YEAR);
 
+		Log.e("TAG", "Before Call");
+		updateTimeScrollView();
 		drawer.setOnDrawerOpenListener(new OnDrawerOpenListener() {
 
 			@Override
@@ -117,24 +130,6 @@ public class TimesScreen extends Fragment {
 					@Override
 					public void onClick(View arg0) {
 						timesCounter--;
-						// TODO Figure Out Delete URL
-						connection = null;
-						String urlDelete = "";
-						try {
-							URL url = new URL(urlDelete);
-							connection = (HttpURLConnection) url
-									.openConnection();
-							connection.connect();
-
-						} catch (MalformedURLException e1) {
-							e1.printStackTrace();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						} finally {
-							if (null != connection) {
-								connection.disconnect();
-							}
-						}
 
 						updateTimeScrollView();
 
@@ -144,25 +139,6 @@ public class TimesScreen extends Fragment {
 
 				timesTableLayout.addView(newTimesRow, timesCounter);
 				timesCounter++;
-
-				connection = null;
-				String urlAdd = "";
-				try {
-					// TODO Figure Out ADD Url
-					URL url = new URL(urlAdd);
-					connection = (HttpURLConnection) url.openConnection();
-					connection.connect();
-
-				} catch (MalformedURLException e1) {
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				} finally {
-					if (null != connection) {
-						connection.disconnect();
-					}
-				}
-
 				drawer.close();
 
 			}
@@ -267,27 +243,97 @@ public class TimesScreen extends Fragment {
 	};
 
 	private void updateTimeScrollView() {
-		connection = null;
-		String urlUpdate = "";
-		try {
-			// TODO Figure Out Update URL
-			URL url = new URL(urlUpdate);
-			connection = (HttpURLConnection) url.openConnection();
-			connection.connect();
-			InputStream in = connection.getInputStream();
+		timesTableLayout.removeAllViews();
+		timesCounter = 0;
 
-			// TODO Parse Page Content
-
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} finally {
-			if (null != connection) {
-				connection.disconnect();
+		// Pulls New Contact List From Database
+		new updateTimesArrayList() {
+			protected void onPostExecute(ArrayList<String> result) {
+				timesArray = result;
+				Log.e("TAG", timesArray.size() + "");
+				for (int count = 0; count < timesArray.size(); count = count +2) {
+					String startDateTime = timesArray.get(count);
+					String endDateTime = timesArray.get(count + 1);
+					String[] startDateTimeInsert = stringParser(startDateTime);
+					String[] endDateTimeInsert = stringParser(endDateTime);
+					insertTimesInScroll(startDateTimeInsert, endDateTimeInsert);
+				}
 			}
-		}
-		drawer.close();
+		}.execute();
 	}
+	
+	private void insertTimesInScroll(String[] start, String[] end)
+	{
+		final View newTimesRow = v.inflate(v.getContext(),
+				R.layout.times_scroll_row, null);
+		final TextView newTimesTextView = (TextView) newTimesRow
+				.findViewById(R.id.timesScrollTextView);
+		newTimesTextView.setText(start[1] + "-" + end[1] + " on " + start[0]);
+
+		ImageButton contactDeleteButton = (ImageButton) newTimesRow
+				.findViewById(R.id.timesDeleteButton);
+		contactDeleteButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				timesCounter--;
+				//TODO Delete Time
+			}
+
+		});
+
+		timesTableLayout.addView(newTimesRow, timesCounter);
+		timesCounter++;
+	}
+	
+	private String[] stringParser(String input){
+		String[] returnThis = new String[2];
+		String day, month, year;
+		String time;
+		day = input.substring(8, 10);
+		month = input.substring(5, 7);
+		year = input.substring(0, 4);
+		time = input.substring(11);
+		returnThis[0] = month + "-" + day + "/" + year;
+		returnThis[1] = time;
+		
+		return returnThis;
+		
+	}
+	// Pulls Contact Information From Database Saves In Array List
+		private class updateTimesArrayList extends
+				AsyncTask<Void, Void, ArrayList<String>> {
+			@Override
+			protected ArrayList<String> doInBackground(Void... params) {
+				ArrayList<String> result = new ArrayList<String>();
+
+				InputStream in = null;
+				try {
+					HttpClient client = new DefaultHttpClient();
+					HttpPost post = new HttpPost(
+							"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id=1");
+					HttpResponse response = client.execute(post);
+					HttpEntity entity = response.getEntity();
+					in = entity.getContent();
+				} catch (Exception e) {
+					Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+				}
+				try {
+					BufferedReader reader = new BufferedReader(
+							new InputStreamReader(in));
+					String line = reader.readLine();
+
+					while (!((line.charAt(0) + "").equals("}"))) {
+						result.add(line);
+						line = reader.readLine();
+					}
+
+				} catch (Exception e) {
+					Log.e("log_tag", "Error Converting String " + e.toString());
+				}
+				return result;
+			}
+
+		}
 
 }
