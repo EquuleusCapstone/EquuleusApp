@@ -88,7 +88,7 @@ public class TimesScreen extends Fragment {
 		month = c.get(Calendar.MONTH);
 		year = c.get(Calendar.YEAR);
 
-		Log.e("TAG", "Before Call");
+		
 		updateTimeScrollView();
 		drawer.setOnDrawerOpenListener(new OnDrawerOpenListener() {
 
@@ -114,31 +114,8 @@ public class TimesScreen extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				final View newTimesRow = v.inflate(v.getContext(),
-						R.layout.times_scroll_row, null);
-				TextView newTimesTextView = (TextView) newTimesRow
-						.findViewById(R.id.timesScrollTextView);
-				newTimesTextView.setText(startTime + " to " + endTime + " on "
-						+ startDate);
-
-				ImageButton timesDeleteButton = (ImageButton) newTimesRow
-						.findViewById(R.id.timesDeleteButton);
-
-				// Deletes The Contact From Friends List and From Database
-				timesDeleteButton.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View arg0) {
-						timesCounter--;
-
-						updateTimeScrollView();
-
-					}
-
-				});
-
-				timesTableLayout.addView(newTimesRow, timesCounter);
-				timesCounter++;
+				
+				
 				drawer.close();
 
 			}
@@ -250,7 +227,6 @@ public class TimesScreen extends Fragment {
 		new updateTimesArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				timesArray = result;
-				Log.e("TAG", timesArray.size() + "");
 				for (int count = 0; count < timesArray.size(); count = count +2) {
 					String startDateTime = timesArray.get(count);
 					String endDateTime = timesArray.get(count + 1);
@@ -331,6 +307,7 @@ public class TimesScreen extends Fragment {
 				} catch (Exception e) {
 					Log.e("log_tag", "Error Converting String " + e.toString());
 				}
+				
 				return result;
 			}
 

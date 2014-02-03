@@ -175,7 +175,6 @@ public class MeetingScreen extends Fragment {
 		new updateContactArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				contactArray = result;
-				Log.e("SIZE",contactArray.size()+"");
 				for (int count = 0; count < contactArray.size(); count++) {
 					insertContactInScroll(contactArray.get(count));
 				}
@@ -189,7 +188,6 @@ public class MeetingScreen extends Fragment {
 		@Override
 		protected ArrayList<String> doInBackground(Void... params) {
 			ArrayList<String> result = new ArrayList<String>();
-			Log.e("HERE","MADE IT TO ASYNC");
 			InputStream in = null;
 			try {
 				HttpClient client = new DefaultHttpClient();
@@ -207,7 +205,6 @@ public class MeetingScreen extends Fragment {
 				String line = reader.readLine();
 
 				while (!((line.charAt(0) + "").equals("}"))) {
-					Log.e("LINE",line);
 					String userId = line;
 					String email = reader.readLine();
 					String fName = reader.readLine();

@@ -160,6 +160,7 @@ public class ContactsScreen extends Fragment {
 			public void onClick(View arg0) {
 				contactCounter--;
 				deleteContact(newContactTextView.getText().toString());
+				Log.e("TAG", newContactTextView.getText().toString());
 			}
 
 		});
@@ -174,15 +175,15 @@ public class ContactsScreen extends Fragment {
 
 		// Gets The User's ID
 		new getID() {
-			protected void onPostExecute(ArrayList<String> result) {
-				deleteArray[0] = userEmail;
+			protected void onPostExecute(String result) {
+				deleteArray[0] = result;
 			}
 		}.execute(userEmail);
 
 		// Gets The Friends ID
 		new getID() {
-			protected void onPostExecute(ArrayList<String> result) {
-				deleteArray[1] = name;
+			protected void onPostExecute(String result) {
+				deleteArray[1] = result;
 			}
 		}.execute(name);
 
@@ -268,15 +269,15 @@ public class ContactsScreen extends Fragment {
 		final String[] addArray = new String[2];
 		// Gets The User's ID
 		new getID() {
-			protected void onPostExecute(ArrayList<String> result) {
-				addArray[0] = userEmail;
+			protected void onPostExecute(String result) {
+				addArray[0] = result;
 			}
 		}.execute(userEmail);
 
 		// Gets The Friends ID
 		new getID() {
-			protected void onPostExecute(ArrayList<String> result) {
-				addArray[1] = name;
+			protected void onPostExecute(String result) {
+				addArray[1] = result;
 			}
 		}.execute(name);
 
@@ -295,6 +296,8 @@ public class ContactsScreen extends Fragment {
 			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id="
 					+ addArray[0][0] + "&friend_id=" + addArray[0][1];
 			try {
+				Log.e("TAG", addArray[0][0]);
+				Log.e("TAG", addArray[0][1]);
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(addURL);
 				HttpResponse response = client.execute(post);
