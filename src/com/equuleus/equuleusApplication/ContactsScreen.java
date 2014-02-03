@@ -274,13 +274,7 @@ public class ContactsScreen extends Fragment {
 			}
 		}.execute(userEmail);
 
-		// Gets The Friends ID
-		new getID() {
-			protected void onPostExecute(String result) {
-				addArray[1] = result;
-			}
-		}.execute(name);
-
+		addArray[1] = name;
 		// Passes Both IDs and Updates Scroll
 		new addContactConnection().execute(addArray);
 		updateScrollView();
@@ -294,7 +288,7 @@ public class ContactsScreen extends Fragment {
 		protected Void doInBackground(String[]... addArray) {
 			InputStream in = null;
 			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id="
-					+ addArray[0][0] + "&friend_id=" + addArray[0][1];
+					+ addArray[0][0] + "&email='" + addArray[0][1] + "'";
 			try {
 				Log.e("TAG", addArray[0][0]);
 				Log.e("TAG", addArray[0][1]);

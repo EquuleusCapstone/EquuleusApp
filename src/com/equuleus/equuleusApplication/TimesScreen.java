@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,12 +45,11 @@ public class TimesScreen extends Fragment {
 	private int month, startMonth;
 	private int year, startYear;
 	private int timesCounter = 0;
-	private String startTime, endTime, startDate;
+	private String startTime, endTime, startDate, dateTimeAdd;
 	private SlidingDrawer drawer;
 	private ArrayList<String> timesArray;
 
 	private TableLayout timesTableLayout;
-
 
 	private TextView timesStartTimeText, timesStartDateText, timesEndTimeText,
 			timesTitle;
@@ -88,7 +88,6 @@ public class TimesScreen extends Fragment {
 		month = c.get(Calendar.MONTH);
 		year = c.get(Calendar.YEAR);
 
-		
 		updateTimeScrollView();
 		drawer.setOnDrawerOpenListener(new OnDrawerOpenListener() {
 
@@ -114,8 +113,8 @@ public class TimesScreen extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				
-				
+				Log.e("TAG", "Here");
+				addTime(startTime, endTime, startDate);
 				drawer.close();
 
 			}
@@ -175,10 +174,18 @@ public class TimesScreen extends Fragment {
 			startMonth = monthOfYear + 1;
 			startYear = year;
 
-			startDate = startMonth + "-" + startDay + "/" + startYear;
+			startDate = startYear + "";
+			if (startMonth < 10)
+				startDate = startYear + "-0" + startMonth;
+			else
+				startDate = startYear + "-" + startMonth;
+
+			if (startDay < 10)
+				startDate += "-0" + startDay;
+			else
+				startDate += "-" + startDay;
 
 			timesStartDateText.setText(startDate);
-
 		}
 	};
 
@@ -227,7 +234,7 @@ public class TimesScreen extends Fragment {
 		new updateTimesArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				timesArray = result;
-				for (int count = 0; count < timesArray.size(); count = count +2) {
+				for (int count = 0; count < timesArray.size(); count = count + 2) {
 					String startDateTime = timesArray.get(count);
 					String endDateTime = timesArray.get(count + 1);
 					String[] startDateTimeInsert = stringParser(startDateTime);
@@ -237,9 +244,8 @@ public class TimesScreen extends Fragment {
 			}
 		}.execute();
 	}
-	
-	private void insertTimesInScroll(String[] start, String[] end)
-	{
+
+	private void insertTimesInScroll(String[] start, String[] end) {
 		final View newTimesRow = v.inflate(v.getContext(),
 				R.layout.times_scroll_row, null);
 		final TextView newTimesTextView = (TextView) newTimesRow
@@ -253,7 +259,12 @@ public class TimesScreen extends Fragment {
 			@Override
 			public void onClick(View arg0) {
 				timesCounter--;
-				//TODO Delete Time
+				String input = newTimesTextView.getText().toString();
+				String newStartTime = input.substring(0,8);
+				String newEndTime = input.substring(9,17);
+				String newDateIn = input.substring(21);
+				deleteTime(newStartTime, newEndTime, newDateIn);
+				// TODO Delete Time
 			}
 
 		});
@@ -261,8 +272,8 @@ public class TimesScreen extends Fragment {
 		timesTableLayout.addView(newTimesRow, timesCounter);
 		timesCounter++;
 	}
-	
-	private String[] stringParser(String input){
+
+	private String[] stringParser(String input) {
 		String[] returnThis = new String[2];
 		String day, month, year;
 		String time;
@@ -270,47 +281,142 @@ public class TimesScreen extends Fragment {
 		month = input.substring(5, 7);
 		year = input.substring(0, 4);
 		time = input.substring(11);
-		returnThis[0] = month + "-" + day + "/" + year;
+		returnThis[0] = year + "-" + month + "-" + day;
 		returnThis[1] = time;
-		
+
 		return returnThis;
-		
+
 	}
+
 	// Pulls Contact Information From Database Saves In Array List
-		private class updateTimesArrayList extends
-				AsyncTask<Void, Void, ArrayList<String>> {
-			@Override
-			protected ArrayList<String> doInBackground(Void... params) {
-				ArrayList<String> result = new ArrayList<String>();
+	private class updateTimesArrayList extends
+			AsyncTask<Void, Void, ArrayList<String>> {
+		@Override
+		protected ArrayList<String> doInBackground(Void... params) {
+			ArrayList<String> result = new ArrayList<String>();
 
-				InputStream in = null;
-				try {
-					HttpClient client = new DefaultHttpClient();
-					HttpPost post = new HttpPost(
-							"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id=1");
-					HttpResponse response = client.execute(post);
-					HttpEntity entity = response.getEntity();
-					in = entity.getContent();
-				} catch (Exception e) {
-					Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			InputStream in = null;
+			try {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(
+						"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id=1");
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				String line = reader.readLine();
+
+				while (!((line.charAt(0) + "").equals("}"))) {
+					result.add(line);
+					line = reader.readLine();
 				}
-				try {
-					BufferedReader reader = new BufferedReader(
-							new InputStreamReader(in));
-					String line = reader.readLine();
 
-					while (!((line.charAt(0) + "").equals("}"))) {
-						result.add(line);
-						line = reader.readLine();
-					}
-
-				} catch (Exception e) {
-					Log.e("log_tag", "Error Converting String " + e.toString());
-				}
-				
-				return result;
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
 
+			return result;
 		}
 
+	}
+
+	// Adds A Time
+	private void deleteTime(String start, String end, String date) {
+		String[] deleteArray = new String[2];
+		deleteArray[0] = date + "%20" + start + ":00";
+		deleteArray[1] = date + "%20" + end + ":00";
+
+		Log.e("TAG", deleteArray[0]);
+		Log.e("TAG", deleteArray[1]);
+		new deleteTimeConnection().execute(deleteArray);
+		updateTimeScrollView();
+
+	}
+
+	// Calls PHP Script To Delete A Time
+	private class deleteTimeConnection extends AsyncTask<String[], Void, Void> {
+
+		// TODO PHP Script Not Yet Built For This?
+		@Override
+		protected Void doInBackground(String[]... deleteArray) {
+			InputStream in = null;
+			String deleteURL = "http://equuleuscapstone.fulton.asu.edu/DeleteUnavail.php?user_id=1&start='"
+					+ deleteArray[0][0] + "'&end='" + deleteArray[0][1] + "'";
+			try {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(deleteURL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				String line = reader.readLine();
+
+				// TODO Error Checking Here
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
+			}
+			return null;
+		}
+
+	}
+
+	// Adds A Time
+	private void addTime(String start, String end, String date) {
+		String[] addArray = new String[2];
+		addArray[0] = dateTimeAdd + "%20" + start + ":00";
+		addArray[1] = dateTimeAdd + "%20" + end + ":00";
+
+		Log.e("TAG", addArray[0]);
+		Log.e("TAG", addArray[1]);
+		new addTimeConnection().execute(addArray);
+		updateTimeScrollView();
+
+	}
+
+	// Calls The PHP Script To Add A Time
+	private class addTimeConnection extends AsyncTask<String[], Void, Void> {
+
+		@Override
+		protected Void doInBackground(String[]... addArray) {
+			InputStream in = null;
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddUnavail.php?user_id=1&start='"
+					+ addArray[0][0] + "'&end='" + addArray[0][1] + "'";
+			try {
+				Log.e("TAG", addArray[0][0]);
+				Log.e("TAG", addArray[0][1]);
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(addURL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				String line = reader.readLine();
+
+				// TODO Error Checking Here
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
+			}
+			return null;
+		}
+
+	}
 }
