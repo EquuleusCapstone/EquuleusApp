@@ -268,13 +268,8 @@ public class ContactsScreen extends Fragment {
 	private void addContact(final String name) {
 		final String[] addArray = new String[2];
 		// Gets The User's ID
-		new getID() {
-			protected void onPostExecute(String result) {
-				addArray[0] = result;
-			}
-		}.execute(userEmail);
 
-		addArray[1] = name;
+		addArray[0] = name;
 		// Passes Both IDs and Updates Scroll
 		new addContactConnection().execute(addArray);
 		updateScrollView();
@@ -287,11 +282,9 @@ public class ContactsScreen extends Fragment {
 		@Override
 		protected Void doInBackground(String[]... addArray) {
 			InputStream in = null;
-			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id="
-					+ addArray[0][0] + "&email='" + addArray[0][1] + "'";
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id=1&email='" + addArray[0][0] + "'";
 			try {
 				Log.e("TAG", addArray[0][0]);
-				Log.e("TAG", addArray[0][1]);
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(addURL);
 				HttpResponse response = client.execute(post);

@@ -107,7 +107,7 @@ public class MeetingScreen extends Fragment {
 	}
 
 	private void updateScrollViews() {
-		//updateMeetingScrollViews();
+		updateMeetingScrollViews();
 		updateContactsScrollViews();
 	}
 
@@ -119,17 +119,32 @@ public class MeetingScreen extends Fragment {
 		new updateMeetingArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				meetingArray = result;
-				for (int count = 0; count < meetingArray.size(); count++) {
-					// TODO MAGIC HERE
-					insertMeetingInScroll(null, null, null);
+				for (int count = 0; count < meetingArray.size(); count = count+2) {
+					insertMeetingInScroll(meetingArray.get(count), meetingArray.get(count+1));
 				}
 			}
 		}.execute();
 	}
 
-	private void insertMeetingInScroll(String name, String length,
-			ArrayList<String> contacts) {
-		// TODO MAGIC HERE
+	private void insertMeetingInScroll(String startDateTime, String endDateTime) {
+		final View newMeetingRow = v.inflate(v.getContext(), R.layout.meeting_scroll_row, null);
+		final TextView newMeetingTextView = (TextView) newMeetingRow
+				.findViewById(R.id.meetingScrollTextView);
+		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
+		ImageButton contactDeleteButton = (ImageButton) newMeetingRow
+				.findViewById(R.id.meetingDeleteButton);
+		contactDeleteButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				meetingCounter--;
+				// TODO Delete Meeting
+			}
+
+		});
+
+		meetingScrollLayout.addView(newMeetingRow, meetingCounter);
+		meetingCounter++;
 	}
 
 	// Pulls Contact Information From Database Saves In Array List
@@ -155,7 +170,15 @@ public class MeetingScreen extends Fragment {
 				String line = reader.readLine();
 
 				while (!((line.charAt(0) + "").equals("}"))) {
-					// TODO NOT YET IMPLEMENTED CANT PARSE
+					String fName = line;
+					String lName = reader.readLine();
+					String email = reader.readLine();
+					String startDateTime = reader.readLine();
+					String endDateTime = reader.readLine();
+					String timeStamp = reader.readLine();
+					line = reader.readLine();
+					result.add(startDateTime);
+					result.add(endDateTime);
 				}
 
 			} catch (Exception e) {
@@ -216,7 +239,6 @@ public class MeetingScreen extends Fragment {
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
-			Log.e("SIZE",result.size()+"");
 			return result;
 		}
 
@@ -224,9 +246,6 @@ public class MeetingScreen extends Fragment {
 
 	// Inserts A Single Contact Into Scroll Panel
 	private void insertContactInScroll(String name) {
-		Log.e("Insert", name);
-		final int index = contactUseCounter;
-		contactUseCounter++;
 		final View newContactRow = v.inflate(v.getContext(),
 				R.layout.meeting_scroll_contacts_row, null);
 		final TextView newContactTextView = (TextView) newContactRow
@@ -241,11 +260,7 @@ public class MeetingScreen extends Fragment {
 					@Override
 					public void onCheckedChanged(CompoundButton arg0,
 							boolean arg1) {
-						if (contactCheckBox.isChecked())
-							contactsInUseArray.add(index, newContactTextView
-									.getText().toString());
-						else
-							contactsInUseArray.remove(index);
+						
 					}
 
 				});

@@ -45,7 +45,7 @@ public class TimesScreen extends Fragment {
 	private int month, startMonth;
 	private int year, startYear;
 	private int timesCounter = 0;
-	private String startTime, endTime, startDate, dateTimeAdd;
+	private String startTime, endTime, startDate;
 	private SlidingDrawer drawer;
 	private ArrayList<String> timesArray;
 
@@ -375,8 +375,8 @@ public class TimesScreen extends Fragment {
 	// Adds A Time
 	private void addTime(String start, String end, String date) {
 		String[] addArray = new String[2];
-		addArray[0] = dateTimeAdd + "%20" + start + ":00";
-		addArray[1] = dateTimeAdd + "%20" + end + ":00";
+		addArray[0] = startDate + "%20" + start + ":00";
+		addArray[1] = startDate + "%20" + end + ":00";
 
 		Log.e("TAG", addArray[0]);
 		Log.e("TAG", addArray[1]);
