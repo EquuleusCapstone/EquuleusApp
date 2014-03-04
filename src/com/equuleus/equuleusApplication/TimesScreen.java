@@ -230,7 +230,7 @@ public class TimesScreen extends Fragment {
 		timesTableLayout.removeAllViews();
 		timesCounter = 0;
 
-		// Pulls New Contact List From Database
+		// Pulls New Times List From Database
 		new updateTimesArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				timesArray = result;
