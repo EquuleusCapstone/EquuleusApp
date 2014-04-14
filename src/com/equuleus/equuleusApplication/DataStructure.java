@@ -25,7 +25,7 @@ public class DataStructure {
 	
 	public void delete(String nameIn)
 	{
-		int delIndex = search(nameIn);
+		int delIndex = search(nameIn); //Has been throwing an IndexOutOfBoundsException when called from the meeting screen
 		swap(delIndex, tailIndex);
 		array.remove(tailIndex);
 		tailIndex--;
