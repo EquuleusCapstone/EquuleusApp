@@ -47,7 +47,8 @@ public class MeetingScreen extends Fragment {
 	private SlidingDrawer drawer;
 	private ArrayList<String> contactArray = null, meetingArray = null;
 	private DataStructure struct;
-	private ArrayList<Date> myTimesArray, combinedTimesArray, contactsTimesArray;
+	private ArrayList<Date> myTimesArray, combinedTimesArray,
+			contactsTimesArray;
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -78,11 +79,55 @@ public class MeetingScreen extends Fragment {
 						.getText().toString());
 				meetingTitle = meetingTitleEditText.getText().toString();
 				calculateMeetingTime(struct);
+				addMeeting(pickTimeSlice(meetingDuration));
 				drawer.close();
 			}
 
 		});
 		return v;
+	}
+
+	private void addMeeting(Date start) {
+		new addMeetingConnection().execute(start);
+	}
+
+	private class addMeetingConnection extends AsyncTask<Date, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Date... arg) {
+			long temp = arg[0].getTime();
+			Date endTime = new Date(temp + (meetingDuration * 60000));
+			InputStream in = null;
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddMeeting.php?owner=1&start='"
+					+ arg[0]
+					+ "'&end='"
+					+ endTime
+					+ "'&description='"
+					+ meetingTitle + "'";
+			try {
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(addURL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				String line = reader.readLine();
+
+				// TODO Error Checking Here
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
+			}
+			return null;
+		}
+
 	}
 
 	private void calculateMeetingTime(DataStructure contacts) {
@@ -115,96 +160,149 @@ public class MeetingScreen extends Fragment {
 
 		struct = new DataStructure();
 
-
 	}
-	
-	private Date pickTimeSlice(int duration)
-	{
+
+	private Date pickTimeSlice(int duration) {
 		Date returnDate = null;
 		long testTime;
-		for(int count = 0; count < combinedTimesArray.size(); count = count + 2)
-		{
-			testTime = combinedTimesArray.get(count + 1).getTime() - combinedTimesArray.get(count).getTime();
+		for (int count = 0; count < combinedTimesArray.size(); count = count + 2) {
+			testTime = combinedTimesArray.get(count + 1).getTime()
+					- combinedTimesArray.get(count).getTime();
 			testTime = testTime / 1000;
 			testTime = testTime / 60;
-			if(testTime > duration)
-			{
+			if (testTime > duration) {
 				returnDate = combinedTimesArray.get(count);
 			}
 		}
-		
+
 		return returnDate;
 	}
 
 	private ArrayList<Date> updateCombinedTimesArray(ArrayList<Date> first,
 			ArrayList<Date> second) {
 		ArrayList<Date> returnList = new ArrayList<Date>();
-		int firstIndex = 0, indexSecond = 0;
-		Date startDateFirst, startDateSecond, endDateFirst, endDateSecond;
-		
-		outerLoop:
-		for (int count = 0; count < first.size(); count = count + 2) {
-			startDateFirst = first.get(count);
-			endDateFirst = first.get(count+1);
-			
-			innerLoop:
-			for (int countsecond = indexSecond; countsecond < second.size(); countsecond = countsecond + 2) {
-				startDateSecond = second.get(countsecond);
-				endDateSecond = second.get(countsecond + 1);
-				if(startDateFirst.before(startDateSecond))
-				{
-					if(endDateFirst.before(startDateSecond))
-					{
-						returnList.add(startDateFirst);
-						returnList.add(endDateFirst);
-						indexSecond = indexSecond + countsecond;
-						break innerLoop;
+		Date fStart, fEnd, sStart, sEnd;
+
+		// runs the loop until one of the arraylists is empty
+		while (first.size() > 0 && second.size() > 0) {
+			fStart = first.get(0);
+			fEnd = first.get(1);
+			sStart = second.get(0);
+			sEnd = second.get(1);
+
+			// checks to see which beginning element comes first
+			if (fStart.before(sStart)) { // fStart is smallest time
+				returnList.add(fStart);
+				// checks if second time block is contained
+				// or overlaps first time block
+				if (fEnd.after(sStart) || fEnd.equals(sStart)) {
+					// loops to find all blocks that are contained within
+					// fStart-fEnd in second array
+					if (sEnd.before(fEnd)) {
+						while (sEnd.before(fEnd)) {
+							// remove irrelevant block from arraylist
+							second.remove(0);
+							second.remove(0);
+
+							// store in next block from first array
+							sStart = second.get(0);
+							sEnd = second.get(1);
+
+							// check to see if there is an overlap in new time
+							// blocks
+							if (fEnd.after(sStart) || fEnd.equals(sStart)) {
+								if (sEnd.before(fEnd)) {
+									// empty to go back into loop
+								} else {
+									// sEnd is bigger than fEnd
+									returnList.add(sEnd);
+									first.remove(0);
+									first.remove(0);
+									second.remove(0);
+									second.remove(0);
+									break;
+								}
+
+							} else {
+								// fEnd is smaller than the new block
+								returnList.add(fEnd);
+								first.remove(0);
+								first.remove(0);
+								break;
+							}
+						}
+					} else {
+						// sEnd is larger than the block
+						returnList.add(sEnd);
+						first.remove(0);
+						first.remove(0);
+						second.remove(0);
+						second.remove(0);
 					}
-					else
-					{
-						returnList.add(startDateFirst);
-						returnList.add(endDateSecond);
-						indexSecond = indexSecond + countsecond;
-						break innerLoop;
-					}
+				} else {
+					// fEnd is smaller than the second block
+					returnList.add(fEnd);
+					first.remove(0);
+					first.remove(0);
 				}
-				else
-				{
-					if(endDateSecond.before(startDateFirst))
-					{
-						returnList.add(startDateSecond);
-						returnList.add(endDateSecond);
+
+			} else {
+				// sStart is smallest time
+				returnList.add(sStart);
+
+				// checks if second time block ends after or same time as first
+				// time block
+				if (sEnd.after(fStart) || sEnd.equals(fStart)) {
+					// loops to find all blocks that are contained within
+					// fStart-fEnd in second array
+					if (fEnd.before(sEnd)) {
+						while (fEnd.before(sEnd)) {
+							// remove irrelevant block from arraylist
+							first.remove(0);
+							first.remove(0);
+
+							// store in next block from first array
+							fStart = first.get(0);
+							fEnd = first.get(1);
+
+							// check to see if there is an overlap in new time
+							// blocks
+							if (sEnd.after(fStart) || sEnd.equals(fStart)) {
+								if (fEnd.before(sEnd)) {
+									// empty
+								} else {
+									// fEnd is bigger than sEnd
+									returnList.add(fEnd);
+									first.remove(0);
+									first.remove(0);
+									second.remove(0);
+									second.remove(0);
+									break;
+								}
+
+							} else {
+								// sEnd is smaller than the first block
+								returnList.add(sEnd);
+								second.remove(0);
+								second.remove(0);
+							}
+						}
+					} else {
+						// fEnd is larger than the second block
+						returnList.add(fEnd);
+						first.remove(0);
+						first.remove(0);
+						second.remove(0);
+						second.remove(0);
 					}
-					else
-					{
-						returnList.add(startDateSecond);
-						returnList.add(endDateFirst);
-						indexSecond = indexSecond + countsecond;
-						break innerLoop;
-					}
+				} else {
+					// sEnd is smaller than the first block
+					returnList.add(sEnd);
+					second.remove(0);
+					second.remove(0);
 				}
-			}
-			
-			if(indexSecond == second.size())
-			{
-				firstIndex = count;
-				break outerLoop;
 			}
 		}
-		
-		if(firstIndex == first.size())
-			for(int c = indexSecond; c < second.size(); c = c + 2)
-			{
-				returnList.add(second.get(c));
-				returnList.add(second.get(c+1));
-			}
-		else
-			for(int c = firstIndex; c < first.size(); c = c + 2)
-			{
-				returnList.add(first.get(c));
-				returnList.add(first.get(c+1));
-			}
-
 		return returnList;
 	}
 
@@ -266,7 +364,7 @@ public class MeetingScreen extends Fragment {
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(in));
 				String line = reader.readLine();
-				
+
 				while (!((line.charAt(0) + "").equals("}"))) {
 					Date temp = simpleDateFormat.parse(line);
 					result.add(temp);
@@ -432,21 +530,18 @@ public class MeetingScreen extends Fragment {
 
 		final CheckBox contactCheckBox = (CheckBox) newContactRow
 				.findViewById(R.id.meetingCheckBox);
-		contactCheckBox
-				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		contactCheckBox.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
 
-					@Override
-					public void onCheckedChanged(CompoundButton arg0,
-							boolean arg1) {
-						if (contactCheckBox.isSelected()) {
-							struct.add(newContactTextView.getText().toString());
-						} else
-							struct.delete(newContactTextView.getText()
-									.toString());
+				if (contactCheckBox.isChecked()) {
+					struct.add(newContactTextView.getText().toString());
+				} else
+					struct.delete(newContactTextView.getText().toString());
+			}
 
-					}
-
-				});
+		});
 
 		drawerScrollLayout.addView(newContactRow, contactCounter);
 		contactCounter++;

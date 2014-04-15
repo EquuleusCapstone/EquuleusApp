@@ -34,6 +34,7 @@ public class ContactsScreen extends Fragment {
 	private View v;
 	private String userEmail;
 	private ArrayList<String> contactArray = null;
+	private Fragment thisScreen = this;
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -188,7 +189,7 @@ public class ContactsScreen extends Fragment {
 		}.execute(name);
 
 		// Passes Both IDs and Updates Scroll
-		new deleteContactConnection().execute(deleteArray);
+		new deleteContactConnection().execute(deleteArray);	
 		updateScrollView();
 
 	}
