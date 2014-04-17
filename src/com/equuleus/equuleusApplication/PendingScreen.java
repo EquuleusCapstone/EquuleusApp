@@ -1,4 +1,4 @@
-/*package com.equuleus.equuleusApplication;
+package com.equuleus.equuleusApplication;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -168,4 +168,3 @@ public class PendingScreen extends Fragment {
 	}// end updatePendingArrayList
 	
 }//end PendingScreen class
-*/
