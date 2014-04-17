@@ -40,7 +40,7 @@ public class PendingScreen extends Fragment {
 	private TableLayout pendingScrollLayout;
 	private Button pendingBtnConfirm, pendingBtnDecline;
 	private String meetingTitle, meetingStart, meetingEnd;
-	private int meetingDuration, meetingCounter = 0, ID;
+	private int meetingCounter = 0, ID;
 	private ArrayList<String> meetingArray = null; 
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -65,6 +65,7 @@ public class PendingScreen extends Fragment {
 		new updatePendingArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				meetingArray = result;
+				//The times to insert come in pairs
 				for (int count = 0; count < meetingArray.size(); count += 2) {
 					insertMeetingInScroll(meetingArray.get(count), meetingArray.get(count+1));
 				}
@@ -114,6 +115,7 @@ public class PendingScreen extends Fragment {
 				while(!((line.charAt(0) + "").equals("}"))) {
 					String meetingId = line;
 					String fName = reader.readLine();
+					String lName = reader.readLine();
 					String email = reader.readLine();
 					String startDateTime = reader.readLine();
 					String endDateTime = reader.readLine();

@@ -447,6 +447,7 @@ public class MeetingScreen extends Fragment {
 				String line = reader.readLine();
 
 				while (!((line.charAt(0) + "").equals("}"))) {
+					String meetingId = line;
 					String fName = line;
 					String lName = reader.readLine();
 					String email = reader.readLine();
