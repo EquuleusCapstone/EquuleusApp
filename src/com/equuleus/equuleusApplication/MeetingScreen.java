@@ -9,7 +9,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,6 +23,7 @@ import android.app.Fragment;
 import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +56,9 @@ public class MeetingScreen extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
+		myTimesArray = new ArrayList<Date>();
+		contactsTimesArray = new ArrayList<Date>();
+		combinedTimesArray = new ArrayList<Date>();
 		struct = new DataStructure();
 
 		v = inflater.inflate(R.layout.meeting_screen, null);
@@ -79,8 +85,11 @@ public class MeetingScreen extends Fragment {
 						.getText().toString());
 				meetingTitle = meetingTitleEditText.getText().toString();
 				calculateMeetingTime(struct);
-				addMeeting(pickTimeSlice(meetingDuration));
+				meetingDurationEditText.setText("");
+				meetingTitleEditText.setText("");
 				drawer.close();
+				updateContactsScrollViews();
+				
 			}
 
 		});
@@ -89,6 +98,7 @@ public class MeetingScreen extends Fragment {
 
 	private void addMeeting(Date start) {
 		new addMeetingConnection().execute(start);
+		updateMeetingScrollViews();
 	}
 
 	private class addMeetingConnection extends AsyncTask<Date, Void, Void> {
@@ -97,11 +107,15 @@ public class MeetingScreen extends Fragment {
 		protected Void doInBackground(Date... arg) {
 			long temp = arg[0].getTime();
 			Date endTime = new Date(temp + (meetingDuration * 60000));
+
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+					"yyyy-MM-dd%20HH:mm:ss");
+
 			InputStream in = null;
 			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddMeeting.php?owner=1&start='"
-					+ arg[0]
+					+ simpleDateFormat.format(arg[0])
 					+ "'&end='"
-					+ endTime
+					+ simpleDateFormat.format(endTime)
 					+ "'&description='"
 					+ meetingTitle + "'";
 			try {
@@ -125,57 +139,82 @@ public class MeetingScreen extends Fragment {
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
+			
+			
 			return null;
 		}
 
 	}
 
-	private void calculateMeetingTime(DataStructure contacts) {
+	private void calculateMeetingTime(DataStructure in) {
+		final DataStructure contacts = in;
+		final int max = contacts.size();
 		new updateTimesArrayList() {
-			protected void onPostExecute(ArrayList<Date> result) {
-				myTimesArray = result;
+			protected void onPostExecute(final ArrayList<Date> myTimes) {
+				combinedTimesArray = myTimes;
+				Log.e("SIZEMAX", max + "");
+				for (int k = 0; k < max; k++) {
+					new getID() {
+						protected void onPostExecute(String contactID) {
+							new updateTimesArrayList() {
+								protected void onPostExecute(
+										final ArrayList<Date> result2) {
+									combinedTimesArray = updateCombinedTimesArray(
+											combinedTimesArray, result2);
+									for (int i = 0; i < combinedTimesArray
+											.size(); i++)
+										Log.e("ENTRY " + i, ": "
+												+ combinedTimesArray.get(i)
+														.toString());
+								}
+							}.execute(Integer.parseInt(contactID));
+						}
+					}.execute(contacts.pop());
+				}
+
+				Date sDate = pickTimeSlice(combinedTimesArray, meetingDuration);
+				Log.e("Mutual Start: ", sDate + "");
+				addMeeting(sDate);
 			}
-		}.execute(1); // TEMP OUR ID TODO
-
-		combinedTimesArray = myTimesArray;
-
-		String email = contacts.pop();
-		while (email != null) {
-			new getID() {
-				protected void onPostExecute(String result) {
-					ID = Integer.parseInt(result);
-				}
-			}.execute(email);
-
-			new updateTimesArrayList() {
-				protected void onPostExecute(ArrayList<Date> result) {
-					contactsTimesArray = result;
-				}
-			}.execute(ID);
-
-			combinedTimesArray = updateCombinedTimesArray(combinedTimesArray,
-					contactsTimesArray);
-			email = contacts.pop();
-		}
-
-		struct = new DataStructure();
+		}.execute(1);
 
 	}
 
-	private Date pickTimeSlice(int duration) {
-		Date returnDate = null;
-		long testTime;
-		for (int count = 0; count < combinedTimesArray.size(); count = count + 2) {
-			testTime = combinedTimesArray.get(count + 1).getTime()
-					- combinedTimesArray.get(count).getTime();
-			testTime = testTime / 1000;
-			testTime = testTime / 60;
-			if (testTime > duration) {
-				returnDate = combinedTimesArray.get(count);
-			}
+	private Date pickTimeSlice(ArrayList<Date> combined, int dura) {
+
+		long duration = dura * 60000; // covert to milliseconds;
+		/*
+		 * Calendar calStart = new GregorianCalendar(); calStart.setTime(new
+		 * Date()); calStart.set(Calendar.HOUR_OF_DAY, 7); //no meetings before
+		 * 7 calStart.set(Calendar.MINUTE, 0); calStart.set(Calendar.SECOND, 0);
+		 * calStart.set(Calendar.MILLISECOND, 0); Date startOfTime =
+		 * calStart.getTime();
+		 * 
+		 * Calendar calEnd = new GregorianCalendar(); calEnd.setTime(new
+		 * Date()); calEnd.set(Calendar.DAY_OF_YEAR,
+		 * calEnd.get(Calendar.DAY_OF_YEAR)); calEnd.set(Calendar.HOUR_OF_DAY,
+		 * 22); //no meetings after 10 calEnd.set(Calendar.MINUTE, 0);
+		 * calEnd.set(Calendar.SECOND, 0); calEnd.set(Calendar.MILLISECOND, 0);
+		 * Date endofTime = calEnd.getTime();
+		 */
+		// if(combined.get(0).getTime() - startOfTime.getTime() > duration)
+		// return startOfTime;
+		// else
+		// {
+		for (int i = 1; i < combined.size() - 1; i = i + 2) {
+			if (combined.get(i + 1).getTime()
+					- (combined.get(i).getTime() + 60000) > duration)
+				return new Date(combined.get(i).getTime() + 600000);
 		}
 
-		return returnDate;
+		// if(endofTime.getTime() - (combined.get(combined.size()-1).getTime() +
+		// 60000) > duration)
+		// {
+		// return new Date(combined.get(combined.size()-1).getTime() + 600000);
+		// }
+		// else
+		return null;
+		// }
 	}
 
 	private ArrayList<Date> updateCombinedTimesArray(ArrayList<Date> first,
@@ -344,7 +383,7 @@ public class MeetingScreen extends Fragment {
 	private class updateTimesArrayList extends
 			AsyncTask<Integer, Void, ArrayList<Date>> {
 		@Override
-		protected ArrayList<Date> doInBackground(Integer... ID) {
+		protected ArrayList<Date> doInBackground(Integer... nde) {
 			ArrayList<Date> result = new ArrayList<Date>();
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
 					"yyyy-MM-dd HH:mm:ss");
@@ -353,7 +392,9 @@ public class MeetingScreen extends Fragment {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
 						"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id="
-								+ ID);
+								+ nde[0]);
+
+				Log.e("ID", nde[0] + "");
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
@@ -366,6 +407,7 @@ public class MeetingScreen extends Fragment {
 				String line = reader.readLine();
 
 				while (!((line.charAt(0) + "").equals("}"))) {
+					Log.e("LINE", line);
 					Date temp = simpleDateFormat.parse(line);
 					result.add(temp);
 					line = reader.readLine();
@@ -375,6 +417,7 @@ public class MeetingScreen extends Fragment {
 				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
 
+			Log.e("SIZE", result.size() + "");
 			return result;
 		}
 
@@ -393,29 +436,31 @@ public class MeetingScreen extends Fragment {
 		new updateMeetingArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				meetingArray = result;
-				for (int count = 0; count < meetingArray.size(); count = count + 2) {
-					insertMeetingInScroll(meetingArray.get(count),
-							meetingArray.get(count + 1));
+				for (int count = 0; count < meetingArray.size(); count = count + 3) {
+					insertMeetingInScroll(meetingArray.get(count),meetingArray.get(count+1),
+							meetingArray.get(count + 2));
 				}
 			}
 		}.execute();
 	}
 
-	private void insertMeetingInScroll(String startDateTime, String endDateTime) {
+	private void insertMeetingInScroll(String meetingID, String startDateTime, String endDateTime) {
 		final View newMeetingRow = v.inflate(v.getContext(),
 				R.layout.meeting_scroll_row, null);
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.meetingScrollTextView);
+		final String meetingid = meetingID;
 		newMeetingTextView.setText("From: " + startDateTime + " To: "
 				+ endDateTime);
-		ImageButton contactDeleteButton = (ImageButton) newMeetingRow
+		ImageButton meetingDeleteButton = (ImageButton) newMeetingRow
 				.findViewById(R.id.meetingDeleteButton);
-		contactDeleteButton.setOnClickListener(new OnClickListener() {
+		meetingDeleteButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				meetingCounter--;
-				deleteMeeting("TEMP"); // TODO THIS DOES NOT WORK
+				Log.e("TEST", meetingid);
+				deleteMeeting(meetingid); // TODO THIS DOES NOT WORK
 			}
 
 		});
@@ -447,7 +492,8 @@ public class MeetingScreen extends Fragment {
 				String line = reader.readLine();
 
 				while (!((line.charAt(0) + "").equals("}"))) {
-					String fName = line;
+					String meetingID = line;
+					String fName = reader.readLine();
 					String lName = reader.readLine();
 					String email = reader.readLine();
 					String startDateTime = reader.readLine();
@@ -455,6 +501,7 @@ public class MeetingScreen extends Fragment {
 					String timeStamp = reader.readLine();
 					String description = reader.readLine();
 					line = reader.readLine();
+					result.add(meetingID);
 					result.add(startDateTime);
 					result.add(endDateTime);
 				}
@@ -547,10 +594,8 @@ public class MeetingScreen extends Fragment {
 		contactCounter++;
 	}
 
-	private void deleteMeeting(final String meetingName) {
-		// magic here to get Meeting ID
-		int meetingId = 0; // temp!!
-		new deleteMeetingConnection().execute(meetingId);
+	private void deleteMeeting(final String meetingID) {
+		new deleteMeetingConnection().execute(Integer.parseInt(meetingID));
 		updateMeetingScrollViews();
 
 	}
@@ -560,7 +605,7 @@ public class MeetingScreen extends Fragment {
 		protected Void doInBackground(Integer... meetingId) {
 			InputStream in = null;
 			String deleteURL = "http://equuleuscapstone.fulton.asu.edu/DeleteMeeting.php?meeting_id="
-					+ meetingId;
+					+ meetingId[0];
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(deleteURL);

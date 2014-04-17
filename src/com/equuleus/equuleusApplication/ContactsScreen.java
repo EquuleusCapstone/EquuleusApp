@@ -160,6 +160,7 @@ public class ContactsScreen extends Fragment {
 			@Override
 			public void onClick(View arg0) {
 				contactCounter--;
+				contactsScrollView.removeAllViews();
 				deleteContact(newContactTextView.getText().toString());
 				Log.e("TAG", newContactTextView.getText().toString());
 			}
