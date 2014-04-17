@@ -74,15 +74,16 @@ public class MeetingScreen extends Fragment {
 		meetingTitleEditText = (EditText) v
 				.findViewById(R.id.meetingDrawerTitleEditText);
 
-		// TODO TEMPORARY EMAIL
-
 		updateScrollViews();
 		meetingConfirmButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				//TODO Check If Meeting Duration Can Be Parsed To Integer / Is Filled Out
 				meetingDuration = Integer.parseInt(meetingDurationEditText
 						.getText().toString());
+				
+				//TODO Check If Title Is Filled Out
 				meetingTitle = meetingTitleEditText.getText().toString();
 				calculateMeetingTime(struct);
 				meetingDurationEditText.setText("");
@@ -127,20 +128,7 @@ public class MeetingScreen extends Fragment {
 				in = entity.getContent();
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
-			}
-
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
-				String line = reader.readLine();
-
-				// TODO Error Checking Here
-
-			} catch (Exception e) {
-				Log.e("log_tag", "Error Converting String " + e.toString());
-			}
-			
-			
+			}		
 			return null;
 		}
 
@@ -370,7 +358,7 @@ public class MeetingScreen extends Fragment {
 				String line = reader.readLine();
 				ID = line;
 
-				// TODO Error Checking Here
+				// TODO Make Sure Database Returned A Value
 
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
@@ -460,7 +448,7 @@ public class MeetingScreen extends Fragment {
 			public void onClick(View arg0) {
 				meetingCounter--;
 				Log.e("TEST", meetingid);
-				deleteMeeting(meetingid); // TODO THIS DOES NOT WORK
+				deleteMeeting(meetingid); 
 			}
 
 		});
@@ -580,8 +568,6 @@ public class MeetingScreen extends Fragment {
 		contactCheckBox.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-
 				if (contactCheckBox.isChecked()) {
 					struct.add(newContactTextView.getText().toString());
 				} else
@@ -614,17 +600,6 @@ public class MeetingScreen extends Fragment {
 				in = entity.getContent();
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
-			}
-
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
-				String line = reader.readLine();
-
-				// TODO Error Checking Here
-
-			} catch (Exception e) {
-				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
 			return null;
 		}

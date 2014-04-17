@@ -114,6 +114,8 @@ public class TimesScreen extends Fragment {
 			@Override
 			public void onClick(View v) {
 				Log.e("TAG", "Here");
+				//TODO Check If EndTime and Date is after Start Time and Date
+				//Can do this checking in the other listeners if you want
 				addTime(startTime, endTime, startDate);
 				drawer.close();
 
@@ -264,7 +266,6 @@ public class TimesScreen extends Fragment {
 				String newEndTime = input.substring(9,17);
 				String newDateIn = input.substring(21);
 				deleteTime(newStartTime, newEndTime, newDateIn);
-				// TODO Delete Time
 			}
 
 		});
@@ -340,8 +341,6 @@ public class TimesScreen extends Fragment {
 
 	// Calls PHP Script To Delete A Time
 	private class deleteTimeConnection extends AsyncTask<String[], Void, Void> {
-
-		// TODO PHP Script Not Yet Built For This?
 		@Override
 		protected Void doInBackground(String[]... deleteArray) {
 			InputStream in = null;
@@ -355,17 +354,6 @@ public class TimesScreen extends Fragment {
 				in = entity.getContent();
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
-			}
-
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
-				String line = reader.readLine();
-
-				// TODO Error Checking Here
-
-			} catch (Exception e) {
-				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
 			return null;
 		}
@@ -405,16 +393,6 @@ public class TimesScreen extends Fragment {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
 			}
 
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
-				String line = reader.readLine();
-
-				// TODO Error Checking Here
-
-			} catch (Exception e) {
-				Log.e("log_tag", "Error Converting String " + e.toString());
-			}
 			return null;
 		}
 

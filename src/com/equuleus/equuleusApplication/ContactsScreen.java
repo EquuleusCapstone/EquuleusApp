@@ -34,7 +34,6 @@ public class ContactsScreen extends Fragment {
 	private View v;
 	private String userEmail;
 	private ArrayList<String> contactArray = null;
-	private Fragment thisScreen = this;
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -66,7 +65,6 @@ public class ContactsScreen extends Fragment {
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-
 								// add new contact to database
 								addContact(input.getText().toString());
 							}
@@ -162,7 +160,6 @@ public class ContactsScreen extends Fragment {
 				contactCounter--;
 				contactsScrollView.removeAllViews();
 				deleteContact(newContactTextView.getText().toString());
-				Log.e("TAG", newContactTextView.getText().toString());
 			}
 
 		});
@@ -218,10 +215,10 @@ public class ContactsScreen extends Fragment {
 			try {
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(in));
-				String line = reader.readLine();
-				ID = line;
+				ID = reader.readLine();
+				
 
-				// TODO Error Checking Here
+				// TODO Make Sure Database Returned A Value
 
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
@@ -235,7 +232,6 @@ public class ContactsScreen extends Fragment {
 	private class deleteContactConnection extends
 			AsyncTask<String[], Void, Void> {
 
-		// TODO PHP Script Not Yet Built For This?
 		@Override
 		protected Void doInBackground(String[]... deleteArray) {
 			InputStream in = null;
@@ -249,17 +245,6 @@ public class ContactsScreen extends Fragment {
 				in = entity.getContent();
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
-			}
-
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
-				String line = reader.readLine();
-
-				// TODO Error Checking Here
-
-			} catch (Exception e) {
-				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
 			return null;
 		}
@@ -296,16 +281,6 @@ public class ContactsScreen extends Fragment {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
 			}
 
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
-				String line = reader.readLine();
-
-				// TODO Error Checking Here
-
-			} catch (Exception e) {
-				Log.e("log_tag", "Error Converting String " + e.toString());
-			}
 			return null;
 		}
 
