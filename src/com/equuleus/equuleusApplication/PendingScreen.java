@@ -43,12 +43,14 @@ public class PendingScreen extends Fragment {
 	private String meetingTitle, meetingStart, meetingEnd;
 	private int meetingCounter = 0, ID;
 	private ArrayList<String> meetingArray = null;
+	private ArrayList<Integer> meetingIdsByIndex = null;
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
 		v = inflater.inflate(R.layout.pending_screen, null);
 		pendingScrollLayout = (TableLayout) v.findViewById(R.id.pendingScrollTableLayout);
+		meetingIdsByIndex = new ArrayList<Integer>();
 		//Populate the Table with pending meetings
 		updatePendingScrollViews();
 		
@@ -79,11 +81,60 @@ public class PendingScreen extends Fragment {
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.pendingScrollTV);
 		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
+		newMeetingTextView.setId(meetingCounter);
 		
+		ImageButton declineMeetingBtn = (ImageButton) newMeetingRow.findViewById(R.id.pendingDeleteButton);
+		ImageButton acceptMeetingBtn = (ImageButton) newMeetingRow.findViewById(R.id.pendingConfirmButton);
+		
+		declineMeetingBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				InputStream in = null;
+				//Call DeclineMeeting.php after getting the meeting Id
+				try {
+					
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(
+						"http://equuleuscapstone.fulton.asu.edu/DeclineMeeting.php?user_id=1&"
+						+"meeting_id="+meetingIdsByIndex.get(newMeetingTextView.getId()));
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+				}
+				catch (Exception e) {
+					Log.e("Pending_Screen", "Error in HTTP Connection "+e.toString());
+				}
+			}
+			
+		});
+		
+		acceptMeetingBtn.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+			InputStream in = null;
+			//Call DeclineMeeting.php after getting the meeting Id
+			try {
+				
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost(
+					"http://equuleuscapstone.fulton.asu.edu/AttendMeeting.php?user_id=1&"
+					+"meeting_id="+meetingIdsByIndex.get(newMeetingTextView.getId()));
+			HttpResponse response = client.execute(post);
+			HttpEntity entity = response.getEntity();
+			in = entity.getContent();
+			}
+			catch (Exception e) {
+				Log.e("Pending_Screen", "Error in HTTP Connection "+e.toString());
+			}
+		}
+		});
 		//Track the new meeting
 		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
+		meetingIdsByIndex.add(Integer.parseInt(meetingId));
 		meetingCounter++;
-	}
+	}//end InsertMeeting
 	
 	
 	private class updatePendingArrayList extends 
