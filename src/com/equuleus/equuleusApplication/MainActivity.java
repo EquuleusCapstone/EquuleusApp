@@ -134,8 +134,9 @@ public class MainActivity extends Activity {
 			break;
 		case 4:
 			fragment = new PendingScreen();
+			break;
 		default:
-			fragment = new PendingScreen();
+			fragment = new ErrorScreen();
 			break;
 		}
 
