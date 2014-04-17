@@ -40,7 +40,6 @@ import android.widget.TextView;
 public class PendingScreen extends Fragment {
 	private View v;
 	private TableLayout pendingScrollLayout;
-	private Button pendingBtnConfirm, pendingBtnDecline;
 	private String meetingTitle, meetingStart, meetingEnd;
 	private int meetingCounter = 0, ID;
 	private ArrayList<String> meetingArray = null;
@@ -53,15 +52,6 @@ public class PendingScreen extends Fragment {
 		//Populate the Table with pending meetings
 		updatePendingScrollViews();
 		
-		pendingBtnConfirm.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				insertMeetingInScroll("changed", "changed", "1");
-			}
-			
-		});
 		return v;
 		
 	}//end onCreateView
@@ -83,22 +73,13 @@ public class PendingScreen extends Fragment {
 		}.execute();
 		
 	}//end updatePendingScrollViews
-	
 	//Add a new meeting into our scroll view
 	private void insertMeetingInScroll(String startDateTime, String endDateTime, String meetingId) {
 		final View newMeetingRow = v.inflate(v.getContext(), R.layout.pending_scroll_row, null);
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.pendingScrollTV);
 		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
-		final TableRow pendingRow = (TableRow) v.findViewById(R.id.pendingScrollRow);
 		
-		pendingRow.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-			}
-			
-		});
 		//Track the new meeting
 		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
 		meetingCounter++;
