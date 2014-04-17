@@ -132,9 +132,8 @@ public class MainActivity extends Activity {
 		case 3:
 			fragment = new MeetingScreen();
 			break;
-		case 4: 
+		case 4:
 			fragment = new PendingScreen();
-			break;
 		default:
 			fragment = new ErrorScreen();
 			break;
