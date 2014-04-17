@@ -43,7 +43,11 @@ public class PendingScreen extends Fragment {
 	private Button pendingBtnConfirm, pendingBtnDecline;
 	private String meetingTitle, meetingStart, meetingEnd;
 	private int meetingCounter = 0, ID;
-	private ArrayList<String> meetingArray = null; 
+	private ArrayList<String> meetingArray = null;
+	private ArrayList<TableRow> rowArray;
+	private ArrayList<Integer> meetingIdArray;
+	private TableRow selectedRow = null;
+	String changed = "No change";
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -51,10 +55,20 @@ public class PendingScreen extends Fragment {
 		pendingScrollLayout = (TableLayout) v.findViewById(R.id.pendingScrollTableLayout);
 		pendingBtnConfirm = (Button) v.findViewById(R.id.PendingBtnOk);
 		pendingBtnDecline = (Button) v.findViewById(R.id.PendingBtnDecline);
-		
+		rowArray = new ArrayList<TableRow>();
+		meetingIdArray = new ArrayList<Integer>();
 		//Populate the Table with pending meetings
 		updatePendingScrollViews();
 		
+		pendingBtnConfirm.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				insertMeetingInScroll(changed, changed, "1");
+			}
+			
+		});
 		return v;
 		
 	}//end onCreateView
@@ -67,9 +81,10 @@ public class PendingScreen extends Fragment {
 		new updatePendingArrayList() {
 			protected void onPostExecute(ArrayList<String> result) {
 				meetingArray = result;
-				//The times to insert come in pairs
-				for (int count = 0; count < meetingArray.size(); count += 2) {
-					insertMeetingInScroll(meetingArray.get(count), meetingArray.get(count+1));
+				//The times to insert come in pairs, with a meeting id afterwards
+				for (int count = 0; count < meetingArray.size(); count += 3) {
+					insertMeetingInScroll(meetingArray.get(count), meetingArray.get(count+1),
+							meetingArray.get(count+2));
 				}
 			}
 		}.execute();
@@ -77,24 +92,24 @@ public class PendingScreen extends Fragment {
 	}//end updatePendingScrollViews
 	
 	//Add a new meeting into our scroll view
-	private void insertMeetingInScroll(String startDateTime, String endDateTime) {
+	private void insertMeetingInScroll(String startDateTime, String endDateTime, String meetingId) {
 		final View newMeetingRow = v.inflate(v.getContext(), R.layout.pending_scroll_row, null);
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.pendingScrollTV);
 		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
 		final TableRow pendingRow = (TableRow) v.findViewById(R.id.pendingScrollRow);
+		rowArray.add(pendingRow);
+		meetingIdArray.add(Integer.parseInt(meetingId));
 		
-		//Allow user to select the new row
-		/*pendingRow.setOnClickListener(new OnClickListener() {
-
+		pendingRow.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				pendingRow.setBackgroundColor(Color.CYAN);
+				// TODO Auto-generated method stub
+				changed = "Yes change!";
+				
 			}
 			
-		});*/
-		
-		
+		});
 		//Track the new meeting
 		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
 		meetingCounter++;
@@ -139,7 +154,8 @@ public class PendingScreen extends Fragment {
 					//Get the next line of input. Could be beginning of new meeting, or }
 					line = reader.readLine();
 					result.add(startDateTime);
-					result.add(endDateTime);	
+					result.add(endDateTime);
+					result.add(meetingId);
 				}
 				
 			}
