@@ -1,4 +1,4 @@
-package com.equuleus.equuleusApplication;
+/*package com.equuleus.equuleusApplication;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +17,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.R;
 import android.app.Fragment;
 import android.graphics.Color;
 import android.net.ParseException;
@@ -54,7 +55,7 @@ public class PendingScreen extends Fragment {
 		v = inflater.inflate(R.layout.pending_screen, null);
 		pendingScrollLayout = (TableLayout) v.findViewById(R.id.pendingScrollTableLayout);
 		pendingBtnConfirm = (Button) v.findViewById(R.id.PendingBtnOk);
-		pendingBtnDecline = (Button) v.findViewById(R.id.PendingBtnDecline);
+		pendingBtnDecline = (Button) v.findViewById(R
 		rowArray = new ArrayList<TableRow>();
 		meetingIdArray = new ArrayList<Integer>();
 		//Populate the Table with pending meetings
@@ -167,3 +168,4 @@ public class PendingScreen extends Fragment {
 	}// end updatePendingArrayList
 	
 }//end PendingScreen class
+*/
