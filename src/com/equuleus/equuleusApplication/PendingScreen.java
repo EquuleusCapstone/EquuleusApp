@@ -75,6 +75,7 @@ public class PendingScreen extends Fragment {
 		}.execute();
 		
 	}//end updatePendingScrollViews
+	
 	//Add a new meeting into our scroll view
 	private void insertMeetingInScroll(String startDateTime, String endDateTime, String meetingId) {
 		final View newMeetingRow = v.inflate(v.getContext(), R.layout.pending_scroll_row, null);
@@ -86,33 +87,81 @@ public class PendingScreen extends Fragment {
 		ImageButton declineMeetingBtn = (ImageButton) newMeetingRow.findViewById(R.id.pendingDeleteButton);
 		ImageButton acceptMeetingBtn = (ImageButton) newMeetingRow.findViewById(R.id.pendingConfirmButton);
 		
+		//The decline button listener will make a call to the asynchronous class that 
+		// handles declining meetings, then interpret the result
 		declineMeetingBtn.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				InputStream in = null;
-				//Call DeclineMeeting.php after getting the meeting Id
-				try {
-					
-				HttpClient client = new DefaultHttpClient();
-				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/DeclineMeeting.php?user_id=1&"
-						+"meeting_id="+meetingIdsByIndex.get(newMeetingTextView.getId()));
-				HttpResponse response = client.execute(post);
-				HttpEntity entity = response.getEntity();
-				in = entity.getContent();
-				}
-				catch (Exception e) {
-					Log.e("Pending_Screen", "Error in HTTP Connection "+e.toString());
-				}
+				Integer meetingKey = newMeetingTextView.getId();
+				
+				//Create a thread to decline a meeting
+				new declineAMeeting() {
+					protected void onPostExecute(Boolean result) {
+						if (result)
+							updatePendingScrollViews();
+						//else
+							//Some error message should go here.
+					}
+				}.execute(meetingKey);
 			}
 			
-		});
+		}); //End decline button listener
 		
-		acceptMeetingBtn.setOnClickListener(new OnClickListener() {
-			
+		//The accept button listener will make a call to the Asynchronous class
+		//that handles confirming meetings, then interpret the result
+		acceptMeetingBtn.setOnClickListener(new OnClickListener() {	
 			@Override
 			public void onClick(View v) {
+				Integer meetingKey = newMeetingTextView.getId();
+				new confirmAMeeting() {
+					protected void onPostExecute(Boolean result) {
+						if (result)
+							updatePendingScrollViews();
+						//else
+							//Some type of error message should go here. 
+					}
+				}.execute(meetingKey);
+			}
+		}); //End accept button listener
+		
+		//Track the new meeting
+		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
+		meetingIdsByIndex.add(Integer.parseInt(meetingId));
+		meetingCounter++;
+	}//end InsertMeeting
+	
+	private class declineAMeeting extends AsyncTask<Integer, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Integer... params) {
+			// TODO Auto-generated method stub
+			InputStream in = null;
+			//Call DeclineMeeting.php after getting the meeting Id
+			try {
+				
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost(
+					"http://equuleuscapstone.fulton.asu.edu/DeclineMeeting.php?user_id=1&"
+					+"meeting_id="+meetingIdsByIndex.get(params[0]));
+			HttpResponse response = client.execute(post);
+			HttpEntity entity = response.getEntity();
+			in = entity.getContent();
+			}
+			catch (Exception e) {
+				Log.e("Pending_Screen", "Error in HTTP Connection "+e.toString());
+				return false;
+			}
+			return true;
+		}
+		
+	} //end decline a meeting private class (thread)
+	
+	private class confirmAMeeting extends AsyncTask<Integer, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Integer... params) {
+			// TODO Auto-generated method stub
 			InputStream in = null;
 			//Call DeclineMeeting.php after getting the meeting Id
 			try {
@@ -120,22 +169,18 @@ public class PendingScreen extends Fragment {
 			HttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost(
 					"http://equuleuscapstone.fulton.asu.edu/AttendMeeting.php?user_id=1&"
-					+"meeting_id="+meetingIdsByIndex.get(newMeetingTextView.getId()));
+					+"meeting_id="+meetingIdsByIndex.get(params[0]));
 			HttpResponse response = client.execute(post);
 			HttpEntity entity = response.getEntity();
 			in = entity.getContent();
 			}
 			catch (Exception e) {
 				Log.e("Pending_Screen", "Error in HTTP Connection "+e.toString());
+				return false;
 			}
-		}
-		});
-		//Track the new meeting
-		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
-		meetingIdsByIndex.add(Integer.parseInt(meetingId));
-		meetingCounter++;
-	}//end InsertMeeting
-	
+			return true;
+		}	
+	} //end confirm a meeting private class (thread)
 	
 	private class updatePendingArrayList extends 
 		AsyncTask<Void, Void, ArrayList<String>> {
