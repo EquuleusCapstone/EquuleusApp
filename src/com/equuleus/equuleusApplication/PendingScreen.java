@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Fragment;
+import android.graphics.Color;
 import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 public class PendingScreen extends Fragment {
@@ -80,6 +82,18 @@ public class PendingScreen extends Fragment {
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.pendingScrollTV);
 		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
+		final TableRow pendingRow = (TableRow) v.findViewById(R.id.pendingScrollRow);
+		
+		//Allow user to select the new row
+		/*pendingRow.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				pendingRow.setBackgroundColor(Color.CYAN);
+			}
+			
+		});*/
+		
 		
 		//Track the new meeting
 		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
