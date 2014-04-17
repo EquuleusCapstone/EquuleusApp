@@ -59,8 +59,10 @@ public class PendingScreen extends Fragment {
 	}//end onCreateView
 	
 	private void updatePendingScrollViews() {
-		pendingScrollLayout.removeAllViews(); //Clear the table
+		//Clear the table and the variables used to track it
+		pendingScrollLayout.removeAllViews();
 		meetingCounter = 0;
+		meetingIdsByIndex = new ArrayList<Integer>();
 		
 		//Get the meeting invitations from the database
 		new updatePendingArrayList() {
@@ -78,11 +80,20 @@ public class PendingScreen extends Fragment {
 	
 	//Add a new meeting into our scroll view
 	private void insertMeetingInScroll(String startDateTime, String endDateTime, String meetingId) {
+		
+		
 		final View newMeetingRow = v.inflate(v.getContext(), R.layout.pending_scroll_row, null);
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.pendingScrollTV);
-		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
+		
+		//Change id of the textbox to allow us to identify it later
+		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
 		newMeetingTextView.setId(meetingCounter);
+		meetingIdsByIndex.add(Integer.parseInt(meetingId));
+		meetingCounter++;
+		
+		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
+
 		
 		ImageButton declineMeetingBtn = (ImageButton) newMeetingRow.findViewById(R.id.pendingDeleteButton);
 		ImageButton acceptMeetingBtn = (ImageButton) newMeetingRow.findViewById(R.id.pendingConfirmButton);
@@ -128,11 +139,6 @@ public class PendingScreen extends Fragment {
 				}.execute(meetingKey);
 			}
 		}); //End accept button listener
-		
-		//Track the new meeting
-		pendingScrollLayout.addView(newMeetingRow, meetingCounter);
-		meetingIdsByIndex.add(Integer.parseInt(meetingId));
-		meetingCounter++;
 	}//end InsertMeeting
 	
 	private class declineAMeeting extends AsyncTask<Integer, Void, Boolean> {
