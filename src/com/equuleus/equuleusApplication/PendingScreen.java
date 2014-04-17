@@ -98,8 +98,10 @@ public class PendingScreen extends Fragment {
 				//Create a thread to decline a meeting
 				new declineAMeeting() {
 					protected void onPostExecute(Boolean result) {
-						if (result)
+						if (result) {
+							meetingCounter--;
 							updatePendingScrollViews();
+						}
 						//else
 							//Some error message should go here.
 					}
@@ -116,8 +118,10 @@ public class PendingScreen extends Fragment {
 				Integer meetingKey = newMeetingTextView.getId();
 				new confirmAMeeting() {
 					protected void onPostExecute(Boolean result) {
-						if (result)
+						if (result) {
+							meetingCounter--;
 							updatePendingScrollViews();
+						}
 						//else
 							//Some type of error message should go here. 
 					}
