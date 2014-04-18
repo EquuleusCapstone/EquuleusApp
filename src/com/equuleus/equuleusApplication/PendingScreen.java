@@ -91,8 +91,9 @@ public class PendingScreen extends Fragment {
 		newMeetingTextView.setId(meetingCounter);
 		meetingIdsByIndex.add(Integer.parseInt(meetingId));
 		meetingCounter++;
-		
-		newMeetingTextView.setText("From: " + startDateTime + " To: " + endDateTime);
+
+		String formattedTime = Meeting.formatTimeRange(startDateTime, endDateTime);
+		newMeetingTextView.setText(formattedTime);
 
 		
 		ImageButton declineMeetingBtn = (ImageButton) newMeetingRow.findViewById(R.id.pendingDeleteButton);
