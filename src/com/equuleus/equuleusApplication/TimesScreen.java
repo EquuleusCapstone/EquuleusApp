@@ -250,6 +250,14 @@ public class TimesScreen extends Fragment {
 	private void insertTimesInScroll(String[] start, String[] end) {
 		final View newTimesRow = v.inflate(v.getContext(),
 				R.layout.times_scroll_row, null);
+		
+		//This is where times would be formatted. However, it looks like the delete method
+		//Relies on these times being formatted in a certain way, and it wouldn't be safe to 
+		//update. If Drew is able to, the deleteTime function should be changed so that it can
+		//be called without relying on the TextView being set up in a specific way.
+		//I would do this by using a Meeting object to store the start and end times of each
+		//time slice instead of parsing them directly from the textview.
+		
 		final TextView newTimesTextView = (TextView) newTimesRow
 				.findViewById(R.id.timesScrollTextView);
 		newTimesTextView.setText(start[1] + "-" + end[1] + " on " + start[0]);
