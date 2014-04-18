@@ -1,0 +1,56 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/meetingContentFrame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:background="@color/black" >
+
+    <TableLayout
+        android:id="@+id/pendingTableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        tools:ignore="UselessParent" >
+
+        <TableRow
+            android:id="@+id/pendingTitleRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/pendingTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:gravity="center_horizontal"
+                android:text="@string/pendingTitleTextView"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/title_text_size" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/pendingScrollRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:layout_weight="1"
+            android:background="@color/gray" >
+
+            <ScrollView
+                android:id="@+id/pendingScrollView"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/gray" >
+
+                <TableLayout
+                    android:id="@+id/pendingScrollTableLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+                </TableLayout>
+            </ScrollView>
+        </TableRow>
+    </TableLayout>
+</FrameLayout>

@@ -8,6 +8,7 @@
         <item>Times</item>
         <item>Contacts</item>
         <item>Meetings</item>
+        <item>Invitations</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>
@@ -31,5 +32,6 @@
     <string name="timesDrawerTextView">"Not Set "</string>
     <string name="meetingDurationEditTextHint">Duration of Meeting(In Minutes)</string>
     <string name="meetingTitleEditTextHint">Title of Meeting</string>
+    <string name="pendingTitleTextView">Meeting Invitations</string>
 
 </resources>
