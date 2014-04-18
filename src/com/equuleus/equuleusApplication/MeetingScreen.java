@@ -438,8 +438,9 @@ public class MeetingScreen extends Fragment {
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.meetingScrollTextView);
 		final String meetingid = meetingID;
-		newMeetingTextView.setText("From: " + startDateTime + " To: "
-				+ endDateTime);
+		//TextView is formatted using static method from Meeting.java
+		//Should be revised if/when this method uses a Meeting object.
+		newMeetingTextView.setText(Meeting.formatTimeRange(startDateTime, endDateTime));
 		ImageButton meetingDeleteButton = (ImageButton) newMeetingRow
 				.findViewById(R.id.meetingDeleteButton);
 		meetingDeleteButton.setOnClickListener(new OnClickListener() {
@@ -448,6 +449,10 @@ public class MeetingScreen extends Fragment {
 			public void onClick(View arg0) {
 				meetingCounter--;
 				Log.e("TEST", meetingid);
+				//NEEDS TO BE CHANGED! This currently deletes the entire meeting
+				//from the database, which should only occur if the meeting is owned by
+				//the person calling the delete. Otherwise, this should call a method
+				//that uses DeclineMeeting.php, which uses the same arguments as DeleteMeeting.
 				deleteMeeting(meetingid); 
 			}
 
