@@ -10,6 +10,9 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+
+import android.app.AlertDialog;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -20,6 +23,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,7 +59,14 @@ public class TimesScreen extends Fragment {
 			timesTitle;
 	private Button timesStartTimeButton, timesEndTimeButton,
 			timesStartDateButton, timesConfirmButton;
-
+	
+	
+	@SuppressWarnings("serial")
+	class DateException extends Exception{
+		public DateException(String msg){
+			super(msg);
+		}
+	}
 	@SuppressWarnings("deprecation")
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -330,11 +341,31 @@ public class TimesScreen extends Fragment {
 		String[] deleteArray = new String[2];
 		deleteArray[0] = date + "%20" + start + ":00";
 		deleteArray[1] = date + "%20" + end + ":00";
-
-		Log.e("TAG", deleteArray[0]);
-		Log.e("TAG", deleteArray[1]);
-		new deleteTimeConnection().execute(deleteArray);
-		updateTimeScrollView();
+		try{
+			Date startD, endD;
+			Log.e("TAG", deleteArray[0]);
+			Log.e("TAG", deleteArray[1]);
+			
+			startD = new Date(startYear, startMonth, startDay, startHour, startMin);
+			endD = new Date(startYear, startMonth, startDay, endHour, endMin);
+			if(startD.after(endD))
+				throw new DateException("Start time cannot be after end time.") ;
+						
+			new deleteTimeConnection().execute(deleteArray);
+			updateTimeScrollView();
+		}
+		catch(Exception e){
+			Log.e("log_tag", "End time is before start time." + e.toString());
+			AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
+			err.setMessage("Error. End time cannot be before start time.");
+			err.setCancelable(false);
+			err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
+				public void onClick(DialogInterface dialog, int which) { 
+					dialog.dismiss();
+				}
+			});
+			err.show();
+		}
 
 	}
 
@@ -373,16 +404,37 @@ public class TimesScreen extends Fragment {
 	}
 
 	// Adds A Time
+	@SuppressWarnings("deprecation")
 	private void addTime(String start, String end, String date) {
 		String[] addArray = new String[2];
 		addArray[0] = startDate + "%20" + start + ":00";
 		addArray[1] = startDate + "%20" + end + ":00";
-
-		Log.e("TAG", addArray[0]);
-		Log.e("TAG", addArray[1]);
-		new addTimeConnection().execute(addArray);
-		updateTimeScrollView();
-
+		try{
+			Date startD, endD;
+			
+			Log.e("TAG", addArray[0]);
+			Log.e("TAG", addArray[1]);
+			
+			startD = new Date(startYear, startMonth, startDay, startHour, startMin);
+			endD = new Date(startYear, startMonth, startDay, endHour, endMin);
+			if(startD.after(endD))
+				throw new DateException("Start time cannot be after end time.") ;
+			
+			new addTimeConnection().execute(addArray);
+			updateTimeScrollView();
+		}
+		catch(Exception e){
+			Log.e("log_tag", "End time is before start time." + e.toString());
+			AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
+			err.setMessage("Error. End time cannot be before start time.");
+			err.setCancelable(false);
+			err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
+				public void onClick(DialogInterface dialog, int which) { 
+					dialog.dismiss();
+				}
+			});
+			err.show();
+		}
 	}
 
 	// Calls The PHP Script To Add A Time
@@ -391,6 +443,7 @@ public class TimesScreen extends Fragment {
 		@Override
 		protected Void doInBackground(String[]... addArray) {
 			InputStream in = null;
+			
 			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddUnavail.php?user_id=1&start='"
 					+ addArray[0][0] + "'&end='" + addArray[0][1] + "'";
 			try {
@@ -409,7 +462,7 @@ public class TimesScreen extends Fragment {
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(in));
 				String line = reader.readLine();
-
+				
 				// TODO Error Checking Here
 
 			} catch (Exception e) {
@@ -417,6 +470,5 @@ public class TimesScreen extends Fragment {
 			}
 			return null;
 		}
-
 	}
 }

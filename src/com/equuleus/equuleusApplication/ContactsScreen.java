@@ -219,7 +219,7 @@ public class ContactsScreen extends Fragment {
 						new InputStreamReader(in));
 				String line = reader.readLine();
 				ID = line;
-
+				//Integer.parseInt(ID);				
 				// TODO Error Checking Here
 
 			} catch (Exception e) {
