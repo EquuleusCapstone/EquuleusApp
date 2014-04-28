@@ -67,6 +67,18 @@ public class TimesScreen extends Fragment {
 			super(msg);
 		}
 	}
+	private void showErrorDialog(String msg){
+		AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
+		err.setTitle("Error!");
+		err.setMessage(msg);
+		err.setCancelable(false);
+		err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
+			public void onClick(DialogInterface dialog, int which) { 
+				dialog.dismiss();
+			}
+		});
+		err.show();
+	}
 	@SuppressWarnings("deprecation")
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -356,15 +368,7 @@ public class TimesScreen extends Fragment {
 		}
 		catch(Exception e){
 			Log.e("log_tag", "End time is before start time." + e.toString());
-			AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
-			err.setMessage("Error. End time cannot be before start time.");
-			err.setCancelable(false);
-			err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
-				public void onClick(DialogInterface dialog, int which) { 
-					dialog.dismiss();
-				}
-			});
-			err.show();
+			showErrorDialog("Invalid start and end times");
 		}
 
 	}
@@ -392,11 +396,14 @@ public class TimesScreen extends Fragment {
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(in));
 				String line = reader.readLine();
-
-				// TODO Error Checking Here
+				if(!line.equals("Success")){
+					throw new DateException("Problem accessing database.");
+				}
+				
 
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
+				showErrorDialog("Something went wrong. No data received from database.");
 			}
 			return null;
 		}
@@ -425,15 +432,7 @@ public class TimesScreen extends Fragment {
 		}
 		catch(Exception e){
 			Log.e("log_tag", "End time is before start time." + e.toString());
-			AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
-			err.setMessage("Error. End time cannot be before start time.");
-			err.setCancelable(false);
-			err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
-				public void onClick(DialogInterface dialog, int which) { 
-					dialog.dismiss();
-				}
-			});
-			err.show();
+			showErrorDialog("The start and end times are invalid.");
 		}
 	}
 
@@ -462,11 +461,13 @@ public class TimesScreen extends Fragment {
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(in));
 				String line = reader.readLine();
+				if(!line.equals("Success")){
+					throw new DateException("Problem accessing database.");
+				}
 				
-				// TODO Error Checking Here
-
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
+				showErrorDialog("Something went wrong. No data received from database.");
 			}
 			return null;
 		}
