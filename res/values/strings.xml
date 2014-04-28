@@ -33,5 +33,12 @@
     <string name="meetingDurationEditTextHint">Duration of Meeting(In Minutes)</string>
     <string name="meetingTitleEditTextHint">Title of Meeting</string>
     <string name="pendingTitleTextView">Meeting Invitations</string>
+    <string name="loginTitle">Login</string>
+    <string name="loginHint">Email Address</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="loginButton">Login</string>
+    <string name="lastNameHint">Last Name</string>
+    <string name="firstNameHint">First Name</string>
 
 </resources>

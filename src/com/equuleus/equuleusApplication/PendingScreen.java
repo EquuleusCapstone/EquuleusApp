@@ -44,10 +44,12 @@ public class PendingScreen extends Fragment {
 	private int meetingCounter = 0, ID;
 	private ArrayList<String> meetingArray = null;
 	private ArrayList<Integer> meetingIdsByIndex = null;
+	private int userid;
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
+		userid = getActivity().getIntent().getExtras().getInt("userID");
 		v = inflater.inflate(R.layout.pending_screen, null);
 		pendingScrollLayout = (TableLayout) v.findViewById(R.id.pendingScrollTableLayout);
 		meetingIdsByIndex = new ArrayList<Integer>();
@@ -153,7 +155,7 @@ public class PendingScreen extends Fragment {
 				
 			HttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost(
-					"http://equuleuscapstone.fulton.asu.edu/DeclineMeeting.php?user_id=1&"
+					"http://equuleuscapstone.fulton.asu.edu/DeclineMeeting.php?user_id=" + userid + "&"
 					+"meeting_id="+meetingIdsByIndex.get(params[0]));
 			HttpResponse response = client.execute(post);
 			HttpEntity entity = response.getEntity();
@@ -179,7 +181,7 @@ public class PendingScreen extends Fragment {
 				
 			HttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost(
-					"http://equuleuscapstone.fulton.asu.edu/AttendMeeting.php?user_id=1&"
+					"http://equuleuscapstone.fulton.asu.edu/AttendMeeting.php?user_id=" + userid + "&"
 					+"meeting_id="+meetingIdsByIndex.get(params[0]));
 			HttpResponse response = client.execute(post);
 			HttpEntity entity = response.getEntity();
@@ -204,7 +206,7 @@ public class PendingScreen extends Fragment {
 				HttpClient client = new DefaultHttpClient();
 				//TODO Remove hardcoded user id 
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/PendingMeetings.php?user_id=1");
+						"http://equuleuscapstone.fulton.asu.edu/PendingMeetings.php?user_id=" + userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();

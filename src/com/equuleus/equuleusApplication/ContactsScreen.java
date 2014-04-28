@@ -34,17 +34,17 @@ public class ContactsScreen extends Fragment {
 	private View v;
 	private String userEmail;
 	private ArrayList<String> contactArray = null;
+	private int userid;
 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		
+		userid = getActivity().getIntent().getExtras().getInt("userID");
 		v = inflater.inflate(R.layout.contacts_screen, container, false);
 		contactsScrollView = (TableLayout) v
 				.findViewById(R.id.contactsScrollTableLayout);
 		addNewContactButton = (Button) v
 				.findViewById(R.id.contactsAddNewButton);
-
-		// TODO TEMPORARY EMAIL
-		userEmail = "abc@gmail.com";
 
 		// Populates Scroll View Initially
 		updateScrollView();
@@ -114,7 +114,7 @@ public class ContactsScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id=1");
+						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id=" + userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
@@ -172,12 +172,7 @@ public class ContactsScreen extends Fragment {
 	private void deleteContact(final String name) {
 		final String[] deleteArray = new String[2];
 
-		// Gets The User's ID
-		new getID() {
-			protected void onPostExecute(String result) {
-				deleteArray[0] = result;
-			}
-		}.execute(userEmail);
+		deleteArray[0] = userid + "";
 
 		// Gets The Friends ID
 		new getID() {
@@ -269,7 +264,7 @@ public class ContactsScreen extends Fragment {
 		@Override
 		protected Void doInBackground(String[]... addArray) {
 			InputStream in = null;
-			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id=1&email='" + addArray[0][0] + "'";
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id=" + userid + "&email='" + addArray[0][0] + "'";
 			try {
 				Log.e("TAG", addArray[0][0]);
 				HttpClient client = new DefaultHttpClient();

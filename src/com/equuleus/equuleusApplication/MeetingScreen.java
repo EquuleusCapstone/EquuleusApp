@@ -53,9 +53,12 @@ public class MeetingScreen extends Fragment {
 	private ArrayList<Date> myTimesArray, combinedTimesArray,
 			contactsTimesArray;
 
+	private int userid;
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-
+		
+		userid = getActivity().getIntent().getExtras().getInt("userID");
+		
 		myTimesArray = new ArrayList<Date>();
 		contactsTimesArray = new ArrayList<Date>();
 		combinedTimesArray = new ArrayList<Date>();
@@ -164,7 +167,7 @@ public class MeetingScreen extends Fragment {
 				Log.e("Mutual Start: ", sDate + "");
 				addMeeting(sDate);
 			}
-		}.execute(1);
+		}.execute(userid);
 
 	}
 
@@ -531,7 +534,7 @@ public class MeetingScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id=1");
+						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id=" + userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();

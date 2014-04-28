@@ -55,10 +55,14 @@ public class TimesScreen extends Fragment {
 			timesTitle;
 	private Button timesStartTimeButton, timesEndTimeButton,
 			timesStartDateButton, timesConfirmButton;
+	
+	private int userid;
 
 	@SuppressWarnings("deprecation")
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		
+		userid = getActivity().getIntent().getExtras().getInt("userID");
 		v = inflater.inflate(R.layout.times_screen, null);
 
 		drawer = (SlidingDrawer) v.findViewById(R.id.timesSlidingDrawer);
@@ -247,7 +251,7 @@ public class TimesScreen extends Fragment {
 		}.execute();
 	}
 
-	private void insertTimesInScroll(String[] start, String[] end) {
+	private void insertTimesInScroll(final String[] start, final String[] end) {
 		final View newTimesRow = v.inflate(v.getContext(),
 				R.layout.times_scroll_row, null);
 		
@@ -260,7 +264,8 @@ public class TimesScreen extends Fragment {
 		
 		final TextView newTimesTextView = (TextView) newTimesRow
 				.findViewById(R.id.timesScrollTextView);
-		newTimesTextView.setText(start[1] + "-" + end[1] + " on " + start[0]);
+		newTimesTextView.setText(Meeting.formatTimeRange(start[0]+" "+start[1]+":00",
+			    end[0]+" " + end[1] + ":00"));
 
 		ImageButton contactDeleteButton = (ImageButton) newTimesRow
 				.findViewById(R.id.timesDeleteButton);
@@ -269,10 +274,10 @@ public class TimesScreen extends Fragment {
 			@Override
 			public void onClick(View arg0) {
 				timesCounter--;
-				String input = newTimesTextView.getText().toString();
-				String newStartTime = input.substring(0,8);
-				String newEndTime = input.substring(9,17);
-				String newDateIn = input.substring(21);
+				String newStartTime = start[1];
+				String newEndTime = end[1];
+				String newDateIn = start[0];
+				String newDateEnd = end[0];
 				deleteTime(newStartTime, newEndTime, newDateIn);
 			}
 
@@ -308,7 +313,7 @@ public class TimesScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id=1");
+						"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id=" + userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
@@ -352,7 +357,7 @@ public class TimesScreen extends Fragment {
 		@Override
 		protected Void doInBackground(String[]... deleteArray) {
 			InputStream in = null;
-			String deleteURL = "http://equuleuscapstone.fulton.asu.edu/DeleteUnavail.php?user_id=1&start='"
+			String deleteURL = "http://equuleuscapstone.fulton.asu.edu/DeleteUnavail.php?user_id=" + userid + "&start='"
 					+ deleteArray[0][0] + "'&end='" + deleteArray[0][1] + "'";
 			try {
 				HttpClient client = new DefaultHttpClient();
@@ -387,7 +392,7 @@ public class TimesScreen extends Fragment {
 		@Override
 		protected Void doInBackground(String[]... addArray) {
 			InputStream in = null;
-			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddUnavail.php?user_id=1&start='"
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddUnavail.php?user_id=" + userid + "&start='"
 					+ addArray[0][0] + "'&end='" + addArray[0][1] + "'";
 			try {
 				Log.e("TAG", addArray[0][0]);

@@ -40,11 +40,15 @@ public class MainActivity extends Activity {
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
 	private String[] mListItems;
+	private int userID;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		Bundle extras = getIntent().getExtras();
+	    userID = extras.getInt("userID");
 
 		mTitle = mDrawerTitle = getTitle();
 		mListItems = getResources().getStringArray(R.array.list_items);
@@ -148,6 +152,10 @@ public class MainActivity extends Activity {
 
 	}
 
+	public int getMainID()
+	{
+		return userID;
+	}
 	@Override
 	public void setTitle(CharSequence title) {
 		mTitle = title;
