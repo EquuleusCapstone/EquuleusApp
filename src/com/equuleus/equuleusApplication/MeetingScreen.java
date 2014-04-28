@@ -48,7 +48,7 @@ public class MeetingScreen extends Fragment {
 	private String meetingTitle, meetingStart, meetingEnd;
 	private int meetingDuration, meetingCounter = 0, contactCounter = 0, ID;
 	private SlidingDrawer drawer;
-	private ArrayList<String> contactArray = null, meetingArray = null;
+	private ArrayList<String> contactArray = null, meetingArray = null, inviteArray = null;
 	private DataStructure struct;
 	private ArrayList<Date> myTimesArray, combinedTimesArray,
 			contactsTimesArray;
@@ -140,6 +140,10 @@ public class MeetingScreen extends Fragment {
 	private void calculateMeetingTime(DataStructure in) {
 		final DataStructure contacts = in;
 		final int max = contacts.size();
+		for(int k = 0; k < max; k++)
+		{
+			inviteArray.set(k, contacts.pop());
+		}
 		new updateTimesArrayList() {
 			protected void onPostExecute(final ArrayList<Date> myTimes) {
 				combinedTimesArray = myTimes;
@@ -160,7 +164,7 @@ public class MeetingScreen extends Fragment {
 								}
 							}.execute(Integer.parseInt(contactID));
 						}
-					}.execute(contacts.pop());
+					}.execute(inviteArray.get(k));
 				}
 
 				Date sDate = pickTimeSlice(combinedTimesArray, meetingDuration);
@@ -168,6 +172,11 @@ public class MeetingScreen extends Fragment {
 				addMeeting(sDate);
 			}
 		}.execute(userid);
+		
+		for(int k = 0; k < max; k++)
+		{
+			//TODO invite each user's email (inviteArray.get(k)) to the meeting
+		}
 
 	}
 
