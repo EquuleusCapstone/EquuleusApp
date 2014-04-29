@@ -11,11 +11,15 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+
+
+
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +40,25 @@ public class ContactsScreen extends Fragment {
 	private ArrayList<String> contactArray = null;
 	private int userid;
 
+	@SuppressWarnings("serial")
+	class EmailFormatException extends Exception{
+		public EmailFormatException(String msg){
+			super(msg);
+		}
+	}
+	private void showErrorDialog(String msg){
+		AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
+		err.setTitle("Error!");
+		err.setMessage(msg);
+		err.setCancelable(false);
+		err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
+			public void onClick(DialogInterface dialog, int which) { 
+				dialog.dismiss();
+			}
+		});
+		err.show();
+	}
+	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
@@ -178,13 +201,13 @@ public class ContactsScreen extends Fragment {
 		new getID() {
 			protected void onPostExecute(String result) {
 				deleteArray[1] = result;
+
+				// Passes Both IDs and Updates Scroll
+				new deleteContactConnection().execute(deleteArray);	
+				updateScrollView();
 			}
 		}.execute(name);
-
-		// Passes Both IDs and Updates Scroll
-		new deleteContactConnection().execute(deleteArray);	
-		updateScrollView();
-
+		
 	}
 
 	//Takes An Email And Returns That Emails User ID
@@ -210,11 +233,8 @@ public class ContactsScreen extends Fragment {
 			try {
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(in));
+
 				ID = reader.readLine();
-				
-
-				// TODO Make Sure Database Returned A Value
-
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
@@ -250,11 +270,17 @@ public class ContactsScreen extends Fragment {
 	private void addContact(final String name) {
 		final String[] addArray = new String[2];
 		// Gets The User's ID
-
-		addArray[0] = name;
-		// Passes Both IDs and Updates Scroll
-		new addContactConnection().execute(addArray);
-		updateScrollView();
+		new getID() {		//TODO Test that this works.
+			protected void onPostExecute(String result) {
+				addArray[1] = userid + "";
+				addArray[0] = name;
+				
+				new addContactConnection().execute(addArray);
+				updateScrollView();
+			}
+		}.execute(userEmail);
+		
+		
 
 	}
 
@@ -274,6 +300,19 @@ public class ContactsScreen extends Fragment {
 				in = entity.getContent();
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				String line = reader.readLine();
+				if(!line.equals("Success")){
+					throw new EmailFormatException("Problem accessing database.");
+				}
+				
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
 
 			return null;

@@ -1,3 +1,4 @@
+
 package com.equuleus.equuleusApplication;
 
 import java.io.BufferedReader;
@@ -17,9 +18,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -58,6 +61,25 @@ public class TimesScreen extends Fragment {
 	
 	private int userid;
 
+	@SuppressWarnings("serial")
+	class DateException extends Exception{
+		public DateException(String msg){
+			super(msg);
+		}
+	}
+	private void showErrorDialog(String msg){
+		AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
+		err.setTitle("Error!");
+		err.setMessage(msg);
+		err.setCancelable(false);
+		err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
+			public void onClick(DialogInterface dialog, int which) { 
+				dialog.dismiss();
+			}
+		});
+		err.show();
+	}
+	
 	@SuppressWarnings("deprecation")
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
