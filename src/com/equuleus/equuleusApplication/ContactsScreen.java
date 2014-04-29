@@ -120,7 +120,9 @@ public class ContactsScreen extends Fragment {
 			protected void onPostExecute(ArrayList<String> result) {
 				contactArray = result;
 				for (int count = 0; count < contactArray.size(); count++) {
-					insertContactInScroll(contactArray.get(count));
+					//insertContactInScroll(contactArray.get(count));
+					insertContactInScroll(contactArray.get(count), contactArray.get(++count),
+							contactArray.get(++count));
 				}
 			}
 		}.execute();
@@ -155,6 +157,10 @@ public class ContactsScreen extends Fragment {
 					String fName = reader.readLine();
 					String lName = reader.readLine();
 					result.add(email);
+					//changes to remove if this doesn't work
+					result.add(fName);
+					result.add(lName);
+					//end changes
 					line = reader.readLine();
 				}
 
@@ -167,12 +173,12 @@ public class ContactsScreen extends Fragment {
 	}
 
 	// Inserts A Single Contact Into Scroll Panel
-	private void insertContactInScroll(String name) {
+	private void insertContactInScroll(String email, String fName, String lName) {
 		final View newContactRow = v.inflate(v.getContext(),
 				R.layout.contacts_scroll_row, null);
 		final TextView newContactTextView = (TextView) newContactRow
 				.findViewById(R.id.contactsScrollTextView);
-		newContactTextView.setText(name);
+		newContactTextView.setText(fName + " " + lName + " : "+ email);
 
 		ImageButton contactDeleteButton = (ImageButton) newContactRow
 				.findViewById(R.id.contactsDeleteButton);
@@ -182,7 +188,10 @@ public class ContactsScreen extends Fragment {
 			public void onClick(View arg0) {
 				contactCounter--;
 				contactsScrollView.removeAllViews();
-				deleteContact(newContactTextView.getText().toString());
+				String emailAddress = newContactTextView.getText().toString();
+				String[] tokens = emailAddress.split(":");
+				//deleteContact(newContactTextView.getText().toString());
+				deleteContact(tokens[1].trim());
 			}
 
 		});
