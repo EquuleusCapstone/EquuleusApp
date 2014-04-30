@@ -30,7 +30,7 @@ public class LoginActivity extends Activity {
 	private EditText emailField;
 	private Button loginButton;
 
-	private String lastName, firstName;
+	private String lastName, firstName, newEmail;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +56,15 @@ public class LoginActivity extends Activity {
 						lastName = lName.getText().toString();
 						firstName = fName.getText().toString();
 						// TODO ADD This user to the database
+						newEmail = emailField.getText().toString();
+						new createUser() {
+							protected void onPostExecute(String userID) {
+								int id = Integer.parseInt(userID);
+								Intent intent = new Intent(getBaseContext(), MainActivity.class);
+								intent.putExtra("userID", id);
+								startActivity(intent);
+							}
+						}.execute(newEmail, firstName, lastName);
 
 					}
 				});
@@ -112,6 +121,44 @@ public class LoginActivity extends Activity {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(idURL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				String line = reader.readLine();
+				ID = line;
+
+				// TODO Make Sure Database Returned A Value
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
+			}
+			return ID;
+		}
+
+	}
+	
+	private class createUser extends AsyncTask<String, Void, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+
+			InputStream in = null;
+			Log.e("log_tag",params[0]+" "+params[1]+" "+params[2]);
+			String createURL = "http://equuleuscapstone.fulton.asu.edu/CreateUser.php?email='"
+					+ params[0] + "'"
+							+ "&f_name='"+params[1] +
+							"'&l_name='"+params[2]+"'";
+			String ID = null;
+			try {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(createURL);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
