@@ -116,7 +116,9 @@ public class LoginActivity extends Activity {
 		protected Void doInBackground(String[]... inArray) {
 			InputStream in = null;
 			//inArray[0][0] is new email, [0][1] is first name, [0][2] is last name
-			String URL = "TEMP NEEDS FILLING"; //TODO FILL OUT THIS PLEASE
+			String URL = "http://equuleuscapstone.fulton.asu.edu/CreateUser.php?email='"+
+			inArray[0][1]+"'&f_name='"+inArray[0][1] +
+			"'&l_name='"+inArray[0][2]+"'"; //TODO FILL OUT THIS PLEASE
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(URL);
