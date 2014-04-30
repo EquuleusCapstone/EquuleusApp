@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
@@ -30,7 +31,7 @@ public class LoginActivity extends Activity {
 	private EditText emailField;
 	private Button loginButton;
 
-	private String lastName, firstName, newEmail;
+	private String lastName, firstName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +56,9 @@ public class LoginActivity extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						lastName = lName.getText().toString();
 						firstName = fName.getText().toString();
+						String[] input = {emailField.getText().toString(), firstName, lastName};
 						// TODO ADD This user to the database
-						newEmail = emailField.getText().toString();
-						new createUser() {
-							protected void onPostExecute(String userID) {
-								int id = Integer.parseInt(userID);
-								Intent intent = new Intent(getBaseContext(), MainActivity.class);
-								intent.putExtra("userID", id);
-								startActivity(intent);
-							}
-						}.execute(newEmail, firstName, lastName);
+						new addUser().execute(input);
 
 					}
 				});
@@ -76,26 +70,33 @@ public class LoginActivity extends Activity {
 					}
 				});
 
-
 		loginButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				final String email = emailField.getText().toString();
-				new getID() {
-					protected void onPostExecute(String contactID) {
-						if (contactID.equals("")) {
-							builder.show();
-						} else {
-							int id = Integer.parseInt(contactID);
-							Intent intent = new Intent(getBaseContext(),
-									MainActivity.class);
-							intent.putExtra("userID", id);
-							startActivity(intent);
-						}
-					}
+				if (email
+						.matches("[a-zA-Z0-9\\.]+@[a-zA-Z0-9\\-\\_\\.]+\\.[a-zA-Z0-9]{3}")) {
 
-				}.execute(email);
+					new getID() {
+						protected void onPostExecute(String contactID) {
+							if (contactID.equals("")) {
+								builder.show();
+							} else {
+								int id = Integer.parseInt(contactID);
+								Intent intent = new Intent(getBaseContext(),
+										MainActivity.class);
+								intent.putExtra("userID", id);
+								startActivity(intent);
+							}
+						}
+
+					}.execute(email);
+				}
+				else
+				{
+					showErrorDialog("Invalid Email");
+				}
 
 			}
 
@@ -108,7 +109,42 @@ public class LoginActivity extends Activity {
 		getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
+	
+	private class addUser extends AsyncTask<String[], Void, Void> {
 
+		@Override
+		protected Void doInBackground(String[]... inArray) {
+			InputStream in = null;
+			//inArray[0][0] is new email, [0][1] is first name, [0][2] is last name
+			String URL = "TEMP NEEDS FILLING"; //TODO FILL OUT THIS PLEASE
+			try {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+			return null;
+		}
+	}
+
+	private void showErrorDialog(String msg){
+		AlertDialog.Builder err = new AlertDialog.Builder(this);
+		err.setTitle(msg);
+		err.setCancelable(false);
+		err.setPositiveButton(R.string.dialogConfirmButton,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+		
+		err.show();
+	}
+	
 	private class getID extends AsyncTask<String, Void, String> {
 
 		@Override
@@ -121,44 +157,6 @@ public class LoginActivity extends Activity {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(idURL);
-				HttpResponse response = client.execute(post);
-				HttpEntity entity = response.getEntity();
-				in = entity.getContent();
-			} catch (Exception e) {
-				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
-			}
-
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(in));
-				String line = reader.readLine();
-				ID = line;
-
-				// TODO Make Sure Database Returned A Value
-
-			} catch (Exception e) {
-				Log.e("log_tag", "Error Converting String " + e.toString());
-			}
-			return ID;
-		}
-
-	}
-	
-	private class createUser extends AsyncTask<String, Void, String> {
-
-		@Override
-		protected String doInBackground(String... params) {
-
-			InputStream in = null;
-			Log.e("log_tag",params[0]+" "+params[1]+" "+params[2]);
-			String createURL = "http://equuleuscapstone.fulton.asu.edu/CreateUser.php?email='"
-					+ params[0] + "'"
-							+ "&f_name='"+params[1] +
-							"'&l_name='"+params[2]+"'";
-			String ID = null;
-			try {
-				HttpClient client = new DefaultHttpClient();
-				HttpPost post = new HttpPost(createURL);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();

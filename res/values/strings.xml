@@ -29,7 +29,7 @@
     <string name="timesDrawerEndTimeButton">End Time</string>
     <string name="timesDrawerEndDateButton">End Date</string>
     <string name="timesDrawerConfirmButton">Confirm</string>
-    <string name="timesDrawerTextView">"Not Set "</string>
+    <string name="timesDrawerTextView">"Not Set"</string>
     <string name="meetingDurationEditTextHint">Duration of Meeting(In Minutes)</string>
     <string name="meetingTitleEditTextHint">Title of Meeting</string>
     <string name="pendingTitleTextView">Meeting Invitations</string>

@@ -19,7 +19,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,20 +50,23 @@ public class MeetingScreen extends Fragment {
 	private String meetingTitle, meetingStart, meetingEnd;
 	private int meetingDuration, meetingCounter = 0, contactCounter = 0, ID;
 	private SlidingDrawer drawer;
-	private ArrayList<String> contactArray = null, meetingArray = null, inviteArray = null;
+	private ArrayList<String> contactArray = null, meetingArray = null,
+			inviteArray = null;
 	private DataStructure struct;
 	private ArrayList<Date> myTimesArray, combinedTimesArray,
 			contactsTimesArray;
 
 	private int userid;
+
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		
+
 		userid = getActivity().getIntent().getExtras().getInt("userID");
-		
+
 		myTimesArray = new ArrayList<Date>();
 		contactsTimesArray = new ArrayList<Date>();
 		combinedTimesArray = new ArrayList<Date>();
+		inviteArray = new ArrayList<String>();
 		struct = new DataStructure();
 
 		v = inflater.inflate(R.layout.meeting_screen, null);
@@ -82,33 +87,99 @@ public class MeetingScreen extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				//TODO Check If Meeting Duration Can Be Parsed To Integer / Is Filled Out
-				meetingDuration = Integer.parseInt(meetingDurationEditText
-						.getText().toString());
-				
-				//TODO Check If Title Is Filled Out
+				boolean cont = true;
+				// TODO Check If Meeting Duration Can Be Parsed To Integer / Is
+				// Filled Out
+				try {
+					meetingDuration = Integer.parseInt(meetingDurationEditText
+							.getText().toString());
+				} catch (Exception e) {
+					showErrorDialog("Invalid Meeting Duration");
+					cont = false;
+				}
+				// TODO Check If Title Is Filled Out
 				meetingTitle = meetingTitleEditText.getText().toString();
-				calculateMeetingTime(struct);
-				meetingDurationEditText.setText("");
-				meetingTitleEditText.setText("");
-				drawer.close();
-				updateContactsScrollViews();
-				
+				if (meetingTitle.equals("")) {
+					showErrorDialog("Title Required");
+					cont = false;
+				}
+				if (cont) {
+					calculateMeetingTime(struct);
+					meetingDurationEditText.setText("");
+					meetingTitleEditText.setText("");
+					drawer.close();
+					updateContactsScrollViews();
+				}
+
 			}
 
 		});
 		return v;
 	}
 
+	private void showErrorDialog(String msg) {
+		AlertDialog.Builder err = new AlertDialog.Builder(this.getActivity());
+		err.setTitle(msg);
+		err.setCancelable(false);
+		err.setPositiveButton(R.string.dialogConfirmButton,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+
+		err.show();
+	}
+
 	private void addMeeting(Date start) {
-		new addMeetingConnection().execute(start);
+		new addMeetingConnection() {
+			protected void onPostExecute(final String meetingID) {
+				for (int k = 0; k < inviteArray.size(); k++) {
+					// TODO invite each user's email (inviteArray.get(k)) to the
+					// meeting
+					new getID() {
+						protected void onPostExecute(String contactID) {
+							int[] input = new int[2];
+							input[0] = Integer.parseInt(meetingID);
+							input[1] = Integer.parseInt(contactID);
+							new inviteUserToMeeting().execute(input);
+						}
+					}.execute(inviteArray.get(k));
+				}
+			}
+		}.execute(start);
 		updateMeetingScrollViews();
 	}
 
-	private class addMeetingConnection extends AsyncTask<Date, Void, Void> {
+	private class inviteUserToMeeting extends AsyncTask<int[], Void, Void> {
 
 		@Override
-		protected Void doInBackground(Date... arg) {
+		protected Void doInBackground(int[]... params) {
+			InputStream in = null;
+			String URL = "http://equuleuscapstone.fulton.asu.edu/InviteMeeting.php?meeting_id="
+					+ params[0][0] + "&user_id=" + params[0][1];
+			Log.e("URL", URL);
+			try {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+
+			return null;
+		}
+
+	}
+
+	private class addMeetingConnection extends AsyncTask<Date, Void, String> {
+
+		@Override
+		protected String doInBackground(Date... arg) {
+			String meetingNum = null;
 			long temp = arg[0].getTime();
 			Date endTime = new Date(temp + (meetingDuration * 60000));
 
@@ -116,12 +187,13 @@ public class MeetingScreen extends Fragment {
 					"yyyy-MM-dd%20HH:mm:ss");
 
 			InputStream in = null;
-			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddMeeting.php?owner="+userid+"&start='"
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddMeeting.php?owner="
+					+ userid
+					+ "&start='"
 					+ simpleDateFormat.format(arg[0])
 					+ "'&end='"
 					+ simpleDateFormat.format(endTime)
-					+ "'&description='"
-					+ meetingTitle + "'";
+					+ "'&description='" + meetingTitle + "'";
 			try {
 
 				HttpClient client = new DefaultHttpClient();
@@ -131,8 +203,19 @@ public class MeetingScreen extends Fragment {
 				in = entity.getContent();
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
-			}		
-			return null;
+			}
+
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				meetingNum = reader.readLine();
+
+				// TODO Make Sure Database Returned A Value
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
+			}
+			return meetingNum;
 		}
 
 	}
@@ -140,9 +223,8 @@ public class MeetingScreen extends Fragment {
 	private void calculateMeetingTime(DataStructure in) {
 		final DataStructure contacts = in;
 		final int max = contacts.size();
-		for(int k = 0; k < max; k++)
-		{
-			inviteArray.set(k, contacts.pop());
+		for (int k = 0; k < max; k++) {
+			inviteArray.add(contacts.pop());
 		}
 		new updateTimesArrayList() {
 			protected void onPostExecute(final ArrayList<Date> myTimes) {
@@ -172,11 +254,6 @@ public class MeetingScreen extends Fragment {
 				addMeeting(sDate);
 			}
 		}.execute(userid);
-		
-		for(int k = 0; k < max; k++)
-		{
-			//TODO invite each user's email (inviteArray.get(k)) to the meeting
-		}
 
 	}
 
@@ -437,22 +514,25 @@ public class MeetingScreen extends Fragment {
 			protected void onPostExecute(ArrayList<String> result) {
 				meetingArray = result;
 				for (int count = 0; count < meetingArray.size(); count = count + 3) {
-					insertMeetingInScroll(meetingArray.get(count),meetingArray.get(count+1),
+					insertMeetingInScroll(meetingArray.get(count),
+							meetingArray.get(count + 1),
 							meetingArray.get(count + 2));
 				}
 			}
 		}.execute();
 	}
 
-	private void insertMeetingInScroll(String meetingID, String startDateTime, String endDateTime) {
+	private void insertMeetingInScroll(String meetingID, String startDateTime,
+			String endDateTime) {
 		final View newMeetingRow = v.inflate(v.getContext(),
 				R.layout.meeting_scroll_row, null);
 		final TextView newMeetingTextView = (TextView) newMeetingRow
 				.findViewById(R.id.meetingScrollTextView);
 		final String meetingid = meetingID;
-		//TextView is formatted using static method from Meeting.java
-		//Should be revised if/when this method uses a Meeting object.
-		newMeetingTextView.setText(Meeting.formatTimeRange(startDateTime, endDateTime));
+		// TextView is formatted using static method from Meeting.java
+		// Should be revised if/when this method uses a Meeting object.
+		newMeetingTextView.setText(Meeting.formatTimeRange(startDateTime,
+				endDateTime));
 		ImageButton meetingDeleteButton = (ImageButton) newMeetingRow
 				.findViewById(R.id.meetingDeleteButton);
 		meetingDeleteButton.setOnClickListener(new OnClickListener() {
@@ -461,11 +541,15 @@ public class MeetingScreen extends Fragment {
 			public void onClick(View arg0) {
 				meetingCounter--;
 				Log.e("TEST", meetingid);
-				//NEEDS TO BE CHANGED! This currently deletes the entire meeting
-				//from the database, which should only occur if the meeting is owned by
-				//the person calling the delete. Otherwise, this should call a method
-				//that uses DeclineMeeting.php, which uses the same arguments as DeleteMeeting.
-				deleteMeeting(meetingid); 
+				// NEEDS TO BE CHANGED! This currently deletes the entire
+				// meeting
+				// from the database, which should only occur if the meeting is
+				// owned by
+				// the person calling the delete. Otherwise, this should call a
+				// method
+				// that uses DeclineMeeting.php, which uses the same arguments
+				// as DeleteMeeting.
+				deleteMeeting(meetingid);
 			}
 
 		});
@@ -484,7 +568,8 @@ public class MeetingScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/GetMeetings.php?user_id="+userid);
+						"http://equuleuscapstone.fulton.asu.edu/GetMeetings.php?user_id="
+								+ userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
@@ -543,7 +628,8 @@ public class MeetingScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id=" + userid);
+						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id="
+								+ userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
@@ -598,9 +684,18 @@ public class MeetingScreen extends Fragment {
 	}
 
 	private void deleteMeeting(final String meetingID) {
-		new deleteMeetingConnection().execute(Integer.parseInt(meetingID));
-		updateMeetingScrollViews();
-
+		new findMeetingOwner() {
+			protected void onPostExecute(Boolean result) {
+				if (result) {
+					new declineAMeeting().execute(Integer.parseInt(meetingID));
+					updateMeetingScrollViews();
+				} else {
+					new deleteMeetingConnection().execute(Integer
+							.parseInt(meetingID));
+					updateMeetingScrollViews();
+				}
+			}
+		}.execute(Integer.parseInt(meetingID));
 	}
 
 	private class deleteMeetingConnection extends
@@ -621,5 +716,78 @@ public class MeetingScreen extends Fragment {
 			return null;
 		}
 	}
+
+	private class findMeetingOwner extends AsyncTask<Integer, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Integer... params) {
+			ArrayList<Integer> result = new ArrayList<Integer>();
+			InputStream in = null;
+			String URL = "http://equuleuscapstone.fulton.asu.edu/MeetingsOwned.php?user_id="
+					+ userid;
+			try {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(in));
+				String line = reader.readLine();
+
+				while (!((line.charAt(0) + "").equals("}"))) {
+					Integer meetingId = Integer.parseInt(line);
+					String start = reader.readLine();
+					String end = reader.readLine();
+					String stamp = reader.readLine();
+					String descrip = reader.readLine();
+					result.add(meetingId);
+					line = reader.readLine();
+				}
+
+			} catch (Exception e) {
+				Log.e("log_tag", "Error Converting String " + e.toString());
+			}
+
+			for (int i = 0; i < result.size(); i++) {
+				if (result.get(i) == params[0]) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+	}
+
+	private class declineAMeeting extends AsyncTask<Integer, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Integer... params) {
+			// TODO Auto-generated method stub
+			InputStream in = null;
+			// Call DeclineMeeting.php after getting the meeting Id
+			try {
+
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(
+						"http://equuleuscapstone.fulton.asu.edu/DeclineMeeting.php?user_id="
+								+ userid + "&" + "meeting_id=" + params[0]);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("Pending_Screen",
+						"Error in HTTP Connection " + e.toString());
+				return false;
+			}
+			return true;
+		}
+
+	} // end decline a meeting private class (thread)
 
 }
