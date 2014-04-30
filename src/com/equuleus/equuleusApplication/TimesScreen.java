@@ -1,4 +1,3 @@
-
 package com.equuleus.equuleusApplication;
 
 import java.io.BufferedReader;
@@ -11,6 +10,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -51,6 +51,7 @@ public class TimesScreen extends Fragment {
 	private String startTime, endTime, startDate;
 	private SlidingDrawer drawer;
 	private ArrayList<String> timesArray;
+	private Date start, end;
 
 	private TableLayout timesTableLayout;
 
@@ -58,32 +59,28 @@ public class TimesScreen extends Fragment {
 			timesTitle;
 	private Button timesStartTimeButton, timesEndTimeButton,
 			timesStartDateButton, timesConfirmButton;
-	
+
 	private int userid;
 
-	@SuppressWarnings("serial")
-	class DateException extends Exception{
-		public DateException(String msg){
-			super(msg);
-		}
-	}
-	private void showErrorDialog(String msg){
-		AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
-		err.setTitle("Error!");
-		err.setMessage(msg);
+	private void showErrorDialog(String msg) {
+		AlertDialog.Builder err = new AlertDialog.Builder(this.getActivity());
+		err.setTitle(msg);
 		err.setCancelable(false);
-		err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
-			public void onClick(DialogInterface dialog, int which) { 
-				dialog.dismiss();
-			}
-		});
+		err.setPositiveButton(R.string.dialogConfirmButton,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+
 		err.show();
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		
+
 		userid = getActivity().getIntent().getExtras().getInt("userID");
 		v = inflater.inflate(R.layout.times_screen, null);
 
@@ -140,11 +137,25 @@ public class TimesScreen extends Fragment {
 			@Override
 			public void onClick(View v) {
 				Log.e("TAG", "Here");
-				//TODO Check If EndTime and Date is after Start Time and Date
-				//Can do this checking in the other listeners if you want
-				addTime(startTime, endTime, startDate);
-				drawer.close();
+				// TODO Check If EndTime and Date is after Start Time and Date
+				// Can do this checking in the other listeners if you want
+				if (timesStartTimeText.getText().toString().equals("Not Set")
+						|| timesEndTimeText.getText().toString()
+								.equals("Not Set")
+						|| timesStartDateText.getText().toString()
+								.equals("Not Set")) {
 
+					showErrorDialog("Not All Time Slots Filled Out");
+				} else {
+					if (endHour < startHour) {
+						showErrorDialog("EndTime After StartTime");
+					} else if (endHour == startHour && endMin <= startMin)
+						showErrorDialog("EndTime After StartTime");
+					else {
+						addTime(startTime, endTime, startDate);
+						drawer.close();
+					}
+				}
 			}
 
 		});
@@ -222,7 +233,6 @@ public class TimesScreen extends Fragment {
 
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minuteIn) {
-
 			startHour = hourOfDay;
 			startMin = minuteIn;
 
@@ -276,18 +286,23 @@ public class TimesScreen extends Fragment {
 	private void insertTimesInScroll(final String[] start, final String[] end) {
 		final View newTimesRow = v.inflate(v.getContext(),
 				R.layout.times_scroll_row, null);
-		
-		//This is where times would be formatted. However, it looks like the delete method
-		//Relies on these times being formatted in a certain way, and it wouldn't be safe to 
-		//update. If Drew is able to, the deleteTime function should be changed so that it can
-		//be called without relying on the TextView being set up in a specific way.
-		//I would do this by using a Meeting object to store the start and end times of each
-		//time slice instead of parsing them directly from the textview.
-		
+
+		// This is where times would be formatted. However, it looks like the
+		// delete method
+		// Relies on these times being formatted in a certain way, and it
+		// wouldn't be safe to
+		// update. If Drew is able to, the deleteTime function should be changed
+		// so that it can
+		// be called without relying on the TextView being set up in a specific
+		// way.
+		// I would do this by using a Meeting object to store the start and end
+		// times of each
+		// time slice instead of parsing them directly from the textview.
+
 		final TextView newTimesTextView = (TextView) newTimesRow
 				.findViewById(R.id.timesScrollTextView);
-		newTimesTextView.setText(Meeting.formatTimeRange(start[0]+" "+start[1]+":00",
-			    end[0]+" " + end[1] + ":00"));
+		newTimesTextView.setText(Meeting.formatTimeRange(start[0] + " "
+				+ start[1] + ":00", end[0] + " " + end[1] + ":00"));
 
 		ImageButton contactDeleteButton = (ImageButton) newTimesRow
 				.findViewById(R.id.timesDeleteButton);
@@ -335,7 +350,8 @@ public class TimesScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id=" + userid);
+						"http://equuleuscapstone.fulton.asu.edu/Unavail.php?user_id="
+								+ userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
@@ -379,8 +395,12 @@ public class TimesScreen extends Fragment {
 		@Override
 		protected Void doInBackground(String[]... deleteArray) {
 			InputStream in = null;
-			String deleteURL = "http://equuleuscapstone.fulton.asu.edu/DeleteUnavail.php?user_id=" + userid + "&start='"
-					+ deleteArray[0][0] + "'&end='" + deleteArray[0][1] + "'";
+			String deleteURL = "http://equuleuscapstone.fulton.asu.edu/DeleteUnavail.php?user_id="
+					+ userid
+					+ "&start='"
+					+ deleteArray[0][0]
+					+ "'&end='"
+					+ deleteArray[0][1] + "'";
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(deleteURL);
@@ -414,8 +434,12 @@ public class TimesScreen extends Fragment {
 		@Override
 		protected Void doInBackground(String[]... addArray) {
 			InputStream in = null;
-			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddUnavail.php?user_id=" + userid + "&start='"
-					+ addArray[0][0] + "'&end='" + addArray[0][1] + "'";
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddUnavail.php?user_id="
+					+ userid
+					+ "&start='"
+					+ addArray[0][0]
+					+ "'&end='"
+					+ addArray[0][1] + "'";
 			try {
 				Log.e("TAG", addArray[0][0]);
 				Log.e("TAG", addArray[0][1]);

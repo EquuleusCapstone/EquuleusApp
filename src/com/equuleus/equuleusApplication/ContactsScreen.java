@@ -11,9 +11,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-
-
-
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
@@ -40,28 +37,24 @@ public class ContactsScreen extends Fragment {
 	private ArrayList<String> contactArray = null;
 	private int userid;
 
-	@SuppressWarnings("serial")
-	class EmailFormatException extends Exception{
-		public EmailFormatException(String msg){
-			super(msg);
-		}
-	}
-	private void showErrorDialog(String msg){
-		AlertDialog err = new AlertDialog.Builder(this.getActivity()).create();
-		err.setTitle("Error!");
-		err.setMessage(msg);
+	private void showErrorDialog(String msg) {
+		AlertDialog.Builder err = new AlertDialog.Builder(this.getActivity());
+		err.setTitle(msg);
 		err.setCancelable(false);
-		err.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok", new DialogInterface.OnClickListener() { 
-			public void onClick(DialogInterface dialog, int which) { 
-				dialog.dismiss();
-			}
-		});
+		err.setPositiveButton(R.string.dialogConfirmButton,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+
 		err.show();
 	}
-	
+
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		
+
 		userid = getActivity().getIntent().getExtras().getInt("userID");
 		v = inflater.inflate(R.layout.contacts_screen, container, false);
 		contactsScrollView = (TableLayout) v
@@ -89,7 +82,15 @@ public class ContactsScreen extends Fragment {
 							public void onClick(DialogInterface dialog,
 									int which) {
 								// add new contact to database
-								addContact(input.getText().toString());
+								if (input
+										.getText()
+										.toString()
+										.matches(
+												"[a-zA-Z0-9\\.]+@[a-zA-Z0-9\\-\\_\\.]+\\.[a-zA-Z0-9]{3}")) {
+									addContact(input.getText().toString());
+								} else {
+									showErrorDialog("Invalid Email");
+								}
 							}
 						});
 				builder.setNegativeButton(R.string.dialogCancelButton,
@@ -137,7 +138,8 @@ public class ContactsScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id=" + userid);
+						"http://equuleuscapstone.fulton.asu.edu/contacts.php?user_id="
+								+ userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
@@ -203,14 +205,14 @@ public class ContactsScreen extends Fragment {
 				deleteArray[1] = result;
 
 				// Passes Both IDs and Updates Scroll
-				new deleteContactConnection().execute(deleteArray);	
+				new deleteContactConnection().execute(deleteArray);
 				updateScrollView();
 			}
 		}.execute(name);
-		
+
 	}
 
-	//Takes An Email And Returns That Emails User ID
+	// Takes An Email And Returns That Emails User ID
 	private class getID extends AsyncTask<String, Void, String> {
 
 		@Override
@@ -243,7 +245,7 @@ public class ContactsScreen extends Fragment {
 
 	}
 
-	//Calls PHP Script To Delete A Contact
+	// Calls PHP Script To Delete A Contact
 	private class deleteContactConnection extends
 			AsyncTask<String[], Void, Void> {
 
@@ -262,37 +264,35 @@ public class ContactsScreen extends Fragment {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
 			}
 
-			
 			return null;
 		}
 
 	}
 
-	//Adds A Contact 
+	// Adds A Contact
 	private void addContact(final String name) {
 		final String[] addArray = new String[2];
 		// Gets The User's ID
-		new getID() {		//TODO Test that this works.
+		new getID() { // TODO Test that this works.
 			protected void onPostExecute(String result) {
 				addArray[1] = userid + "";
 				addArray[0] = name;
-				
+
 				new addContactConnection().execute(addArray);
 				updateScrollView();
 			}
 		}.execute(userEmail);
-		
-		
 
 	}
 
-	//Calls The PHP Script To Add A Contact
+	// Calls The PHP Script To Add A Contact
 	private class addContactConnection extends AsyncTask<String[], Void, Void> {
 
 		@Override
 		protected Void doInBackground(String[]... addArray) {
 			InputStream in = null;
-			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id=" + userid + "&email='" + addArray[0][0] + "'";
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddContact.php?user_id="
+					+ userid + "&email='" + addArray[0][0] + "'";
 			try {
 				Log.e("TAG", addArray[0][0]);
 				HttpClient client = new DefaultHttpClient();
@@ -303,20 +303,16 @@ public class ContactsScreen extends Fragment {
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
 			}
-
+			
 			try {
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(in));
 				String line = reader.readLine();
-				if(!line.equals("Success")){
-					throw new EmailFormatException("Problem accessing database.");
-				}
-				
-
+				if(!line.equals("Success"))
+					showErrorDialog("Email Not Found");
 			} catch (Exception e) {
 				Log.e("log_tag", "Error Converting String " + e.toString());
 			}
-
 			return null;
 		}
 

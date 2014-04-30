@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
@@ -67,26 +68,33 @@ public class LoginActivity extends Activity {
 					}
 				});
 
-
 		loginButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				final String email = emailField.getText().toString();
-				new getID() {
-					protected void onPostExecute(String contactID) {
-						if (contactID.equals("")) {
-							builder.show();
-						} else {
-							int id = Integer.parseInt(contactID);
-							Intent intent = new Intent(getBaseContext(),
-									MainActivity.class);
-							intent.putExtra("userID", id);
-							startActivity(intent);
-						}
-					}
+				if (email
+						.matches("[a-zA-Z0-9\\.]+@[a-zA-Z0-9\\-\\_\\.]+\\.[a-zA-Z0-9]{3}")) {
 
-				}.execute(email);
+					new getID() {
+						protected void onPostExecute(String contactID) {
+							if (contactID.equals("")) {
+								builder.show();
+							} else {
+								int id = Integer.parseInt(contactID);
+								Intent intent = new Intent(getBaseContext(),
+										MainActivity.class);
+								intent.putExtra("userID", id);
+								startActivity(intent);
+							}
+						}
+
+					}.execute(email);
+				}
+				else
+				{
+					showErrorDialog("Invalid Email");
+				}
 
 			}
 
@@ -100,6 +108,21 @@ public class LoginActivity extends Activity {
 		return true;
 	}
 
+	private void showErrorDialog(String msg){
+		AlertDialog.Builder err = new AlertDialog.Builder(this);
+		err.setTitle(msg);
+		err.setCancelable(false);
+		err.setPositiveButton(R.string.dialogConfirmButton,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+		
+		err.show();
+	}
+	
 	private class getID extends AsyncTask<String, Void, String> {
 
 		@Override
