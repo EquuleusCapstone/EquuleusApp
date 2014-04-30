@@ -484,7 +484,7 @@ public class MeetingScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/GetMeetings.php?user_id=1");
+						"http://equuleuscapstone.fulton.asu.edu/GetMeetings.php?user_id=" + userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();

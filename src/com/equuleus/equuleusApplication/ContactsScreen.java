@@ -261,6 +261,8 @@ public class ContactsScreen extends Fragment {
 			} catch (Exception e) {
 				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
 			}
+
+			
 			return null;
 		}
 
