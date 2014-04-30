@@ -56,7 +56,9 @@ public class LoginActivity extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						lastName = lName.getText().toString();
 						firstName = fName.getText().toString();
+						String[] input = {emailField.getText().toString(), firstName, lastName};
 						// TODO ADD This user to the database
+						new addUser().execute(input);
 
 					}
 				});
@@ -106,6 +108,26 @@ public class LoginActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.login, menu);
 		return true;
+	}
+	
+	private class addUser extends AsyncTask<String[], Void, Void> {
+
+		@Override
+		protected Void doInBackground(String[]... inArray) {
+			InputStream in = null;
+			//inArray[0][0] is new email, [0][1] is first name, [0][2] is last name
+			String URL = "TEMP NEEDS FILLING"; //TODO FILL OUT THIS PLEASE
+			try {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(URL);
+				HttpResponse response = client.execute(post);
+				HttpEntity entity = response.getEntity();
+				in = entity.getContent();
+			} catch (Exception e) {
+				Log.e("log_tag", "Error In HTTP Connection" + e.toString());
+			}
+			return null;
+		}
 	}
 
 	private void showErrorDialog(String msg){
