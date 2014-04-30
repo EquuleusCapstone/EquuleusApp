@@ -116,7 +116,7 @@ public class MeetingScreen extends Fragment {
 					"yyyy-MM-dd%20HH:mm:ss");
 
 			InputStream in = null;
-			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddMeeting.php?owner=1&start='"
+			String addURL = "http://equuleuscapstone.fulton.asu.edu/AddMeeting.php?owner="+userid+"&start='"
 					+ simpleDateFormat.format(arg[0])
 					+ "'&end='"
 					+ simpleDateFormat.format(endTime)
@@ -484,7 +484,7 @@ public class MeetingScreen extends Fragment {
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(
-						"http://equuleuscapstone.fulton.asu.edu/GetMeetings.php?user_id=1");
+						"http://equuleuscapstone.fulton.asu.edu/GetMeetings.php?user_id="+userid);
 				HttpResponse response = client.execute(post);
 				HttpEntity entity = response.getEntity();
 				in = entity.getContent();
