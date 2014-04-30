@@ -56,9 +56,13 @@ public class LoginActivity extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						lastName = lName.getText().toString();
 						firstName = fName.getText().toString();
-						String[] input = {emailField.getText().toString(), firstName, lastName};
+						String[] input = { emailField.getText().toString(),
+								firstName, lastName };
 						// TODO ADD This user to the database
-						new addUser().execute(input);
+							new addUser().execute(input);
+							dialog.cancel();
+
+						
 
 					}
 				});
@@ -82,6 +86,7 @@ public class LoginActivity extends Activity {
 						protected void onPostExecute(String contactID) {
 							if (contactID.equals("")) {
 								builder.show();
+
 							} else {
 								int id = Integer.parseInt(contactID);
 								Intent intent = new Intent(getBaseContext(),
@@ -92,9 +97,7 @@ public class LoginActivity extends Activity {
 						}
 
 					}.execute(email);
-				}
-				else
-				{
+				} else {
 					showErrorDialog("Invalid Email");
 				}
 
@@ -109,16 +112,20 @@ public class LoginActivity extends Activity {
 		getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
-	
+
 	private class addUser extends AsyncTask<String[], Void, Void> {
 
 		@Override
 		protected Void doInBackground(String[]... inArray) {
 			InputStream in = null;
-			//inArray[0][0] is new email, [0][1] is first name, [0][2] is last name
-			String URL = "http://equuleuscapstone.fulton.asu.edu/CreateUser.php?email='"+
-			inArray[0][0]+"'&f_name='"+inArray[0][1] +
-			"'&l_name='"+inArray[0][2]+"'"; //TODO FILL OUT THIS PLEASE
+			// inArray[0][0] is new email, [0][1] is first name, [0][2] is last
+			// name
+			String URL = "http://equuleuscapstone.fulton.asu.edu/CreateUser.php?email='"
+					+ inArray[0][0]
+					+ "'&f_name='"
+					+ inArray[0][1]
+					+ "'&l_name='" + inArray[0][2] + "'"; // TODO FILL OUT THIS
+															// PLEASE
 			try {
 				HttpClient client = new DefaultHttpClient();
 				HttpPost post = new HttpPost(URL);
@@ -132,7 +139,7 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-	private void showErrorDialog(String msg){
+	private void showErrorDialog(String msg) {
 		AlertDialog.Builder err = new AlertDialog.Builder(this);
 		err.setTitle(msg);
 		err.setCancelable(false);
@@ -143,10 +150,10 @@ public class LoginActivity extends Activity {
 						dialog.cancel();
 					}
 				});
-		
+
 		err.show();
 	}
-	
+
 	private class getID extends AsyncTask<String, Void, String> {
 
 		@Override
